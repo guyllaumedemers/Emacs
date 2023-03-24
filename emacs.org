@@ -47,6 +47,25 @@ By adding the directory ~/bin or C:\Users\<user>\bin to PATH variable it makes e
 
 #+end_src
 
+** Gh CLI
+
+gh cli allow creation of repo on the upstream using the command line.
+
+#+begin_src emacs-lisp
+
+  ;; run chocolatey install gh
+
+  ;;# create a repository interactively
+  ;;gh repo create
+
+  ;;# create a new remote repository and clone it locally
+  ;;gh repo create my-project --public --clone
+
+  ;;# create a remote repository from the current directory
+  ;;gh repo create my-project --private --source=. --remote=upstream 
+
+#+end_src
+
 ** Compilation Keybindings
 
 Handy key bindings for invoking compilation command.
