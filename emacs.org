@@ -514,7 +514,6 @@ This section contains the basic configuration for =org-mode= plus the configurat
 #+begin_src emacs-lisp
 
   (use-package org-bullets
-    :after org
     :hook (org-mode . org-bullets-mode)
     :custom
     (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
@@ -662,12 +661,25 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     (lsp-headerline-breadcrumb-mode))
 
   (use-package lsp-mode
-    :commands (lsp lsp-deferred)
-    :hook (lsp-mode . efs/lsp-mode-setup)
     :init
-    (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
-    :config
-    (lsp-enable-which-key-integration t))
+    ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+    (setq lsp-keymap-prefix "C-c l")
+    :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+           (c-mode . lsp-deferred)
+           (c++-mode . lsp-deferred)
+           ;; if you want which-key integration
+           (lsp-mode . lsp-enable-which-key-integration)
+           (lsp-mode . efs/lsp-mode-setup))
+    :commands (lsp lsp-deferred))
+
+  ;; The path to lsp-mode needs to be added to load-path as well as the
+  ;; path to the `clients' subdirectory.
+  (add-to-list 'load-path (expand-file-name "lib/lsp-mode" user-emacs-directory))
+  (add-to-list 'load-path (expand-file-name "lib/lsp-mode/clients" user-emacs-directory))
+
+  ;; optionally if you want to use debugger
+  ;; (use-package dap-mode)
+  ;; ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
 
 #+end_src
 
@@ -698,7 +710,13 @@ This package is built on the [[https://github.com/Alexander-Miller/treemacs][tre
 
 #+begin_src emacs-lisp
 
-  (use-package lsp-treemacs)
+  (defun efs/toggle-treemacs ()
+    (treemacs)
+    (lsp-treemacs-symbols))
+
+  (use-package lsp-treemacs
+    :hook (lsp-mode . efs/toggle-treemacs)
+    :config (lsp-treemacs-sync-mode t))
 
 #+end_src
 
@@ -714,5 +732,33 @@ Try these commands with =M-x=:
 #+begin_src emacs-lisp
 
   (use-package lsp-ivy)
+
+#+end_src
+
+*** Company Mode
+
+[[http://company-mode.github.io/][Company Mode]] provides a nicer in-buffer completion interface than =completion-at-point= which is more reminiscent of what you would expect from an IDE.  We add a simple configuration to make the keybindings a little more useful (=TAB= now completes the selection and initiates completion at the current location if needed).
+
+We also use [[https://github.com/sebastiencs/company-box][company-box]] to further enhance the look of the completions with icons and better overall presentation.
+
+#+begin_src emacs-lisp
+
+  (use-package company
+    :hook (lsp-mode . company-mode)
+    :bind (:map company-active-map
+                ("<tab>" . company-complete-selection))
+    (:map lsp-mode-map
+          ("<tab>" . company-indent-or-complete-common))
+    :custom
+    (company-minimum-prefix-length 1)
+    (company-idle-delay 0.0))
+
+  (use-package company-box
+    :hook (company-mode . company-box-mode))
+
+  ;; make function returning parse %PATH% thta return mingw using regex and flip \ to /
+  (use-package company-c-headers
+    :config (add-to-list 'company-backends 'company-c-headers)
+    (add-to-list 'company-c-headers-path-system "C:/ProgramData/chocolatey/lib/mingw/tools/install/mingw64/lib/gcc/x86_64-w64-mingw32/12.2.0/include/c++"))
 
 #+end_src
