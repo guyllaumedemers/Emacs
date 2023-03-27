@@ -756,9 +756,13 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
   (use-package company-box
     :hook (company-mode . company-box-mode))
 
-  ;; make function returning parse %PATH% thta return mingw using regex and flip \ to /
   (use-package company-c-headers
     :config (add-to-list 'company-backends 'company-c-headers)
-    (add-to-list 'company-c-headers-path-system "C:/ProgramData/chocolatey/lib/mingw/tools/install/mingw64/lib/gcc/x86_64-w64-mingw32/12.2.0/include/c++"))
+    (progn
+      (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
+      (dolist (elem system_path)
+        (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*mingw[a-zA-Z0-9\\\/\.\:\_\+\-]*" elem)
+          (setq temp_var elem)
+          (add-to-list 'company-c-headers-path-system temp_var)))))
 
 #+end_src
