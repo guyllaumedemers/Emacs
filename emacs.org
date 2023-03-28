@@ -12,8 +12,15 @@ Here is a emacs config derived from systemcrafters.cc= that customize further yo
 Chocolatey is a machine-level, command-line package manager and installer for software on Microsoft Windows. It uses the NuGet packaging infrastructure and Windows PowerShell to simplify the process of downloading and installing software.
 
 #+begin_src emacs-lisp
-
-  ;; run shell command to download chocolatey
+ 
+  ;; (progn
+  ;;   (defun install-chocolatey ()
+  ;;     ;; install chocolatey on window using cmd prompt
+  ;;     (interactive)
+  ;;     (if (eq system-type 'windows-nt)
+  ;;         (shell-command "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))")))
+  ;;   ;; invoke function
+  ;;   (install-chocolatey))
 
 #+end_src
 
@@ -24,7 +31,12 @@ applications ported to Windows and it also makes directory browser in Emacs and 
 
 #+begin_src emacs-lisp
 
-  ;;setx HOME "%HOME%" 
+  ;; (progn
+  ;;   (defun SetHOME ()
+  ;;     (interactive)
+  ;;     (if (eq system-type 'windows-nt)
+  ;;         (shell-command "setx HOME %HOME%")))
+  ;;   (SetHOME))
 
 #+end_src
 
@@ -35,34 +47,40 @@ By adding the directory ~/bin or C:\Users\<user>\bin to PATH variable it makes e
 
 #+begin_src emacs-lisp
 
-  ;;setx PATH "%PATH%;%USERPROFILE%\bin"
+  ;; (progn
+  ;;   (defun SetPATH ()
+  ;;     (interactive)
+  ;;     (if (eq system-type 'windows-nt)
+  ;;         (shell-command "setx PATH \"%PATH%;%USERPROFILE%\\bin\"")))
+  ;;   (SetPATH))
 
 #+end_src
 
 ** Git (distributed version control system)
 
+Git is a distributed version control system that tracks changes in any set of computer files, usually used for coordinating work among programmers collaboratively developing source code during software development.
+
 #+begin_src emacs-lisp
 
-  ;; run chocolatey install git
+  ;; (progn
+  ;;   (defun install-git ()
+  ;;     (interactive)
+  ;;     (shell-command "choco install git"))
+  ;;   (install-git))
 
 #+end_src
 
 ** Gh CLI
 
-gh cli allow creation of repo on the upstream using the command line.
+gh cli allow creation of repo on the upstream using the command line. [gh repo create] for creating repository locally. [gh repo create my-project --public --clone] for creating a new remote repository and clone it locally. [gh repo create my-project --private --source=. --remote=upstream] for creating a remote repository from the current directory.
 
 #+begin_src emacs-lisp
 
-  ;; run chocolatey install gh
-
-  ;;# create a repository interactively
-  ;;gh repo create
-
-  ;;# create a new remote repository and clone it locally
-  ;;gh repo create my-project --public --clone
-
-  ;;# create a remote repository from the current directory
-  ;;gh repo create my-project --private --source=. --remote=upstream 
+  ;; (progn
+  ;;   (defun install-gh ()
+  ;;     (interactive)
+  ;;     (shell-command "choco install gh"))
+  ;;   (install-gh))
 
 #+end_src
 
@@ -527,8 +545,7 @@ We use [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]
 #+begin_src emacs-lisp
 
   (defun efs/org-mode-visual-fill ()
-    (setq visual-fill-column-width 100
-	  visual-fill-column-center-text t)
+    (setq visual-fill-column-width 100 visual-fill-column-center-text t)
     (visual-fill-column-mode 1))
 
   (use-package visual-fill-column
