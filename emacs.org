@@ -5,7 +5,13 @@
 
 Here is a emacs config derived from systemcrafters.cc= that customize further your emacs experience in a MS Windows environment. %HOME% & %PATH% environment variables will be configure following the [[https://caiorss.github.io/Emacs-Elisp-Programming/Emacs_On_Windows.html][caiorss.github.io]] tutorial.
 
-* System Config
+* Tips for Use
+
+In this document I've added links in many places that lead you to documentation for the various packages we use.  If you're looking at this file in Emacs, you can put your cursor on a link and press =C-c C-o= or run =M-x org-open-at-point= to open the link in your web browser.
+
+* Distribution Service
+
+Set basic requirements for your operating system.
 
 ** Chocolatey (distribution service - package manager)
 
@@ -24,39 +30,11 @@ Chocolatey is a machine-level, command-line package manager and installer for so
 
 #+end_src
 
-** Env PATH
+** Tools
 
-The HOME environment variable that has the default value /home/<username>) on Linux sets the user's directory path. This variable, which is equivalent to _%USERPROFILE% _(C:\\Users\<username> ) is expected to be set by many Unix
-applications ported to Windows and it also makes directory browser in Emacs and shells easier.
+Set of tools, bash terminal, compilers and build system generator.
 
-#+begin_src emacs-lisp
-
-  ;; (progn
-  ;;   (defun SetHOME ()
-  ;;     (interactive)
-  ;;     (if (eq system-type 'windows-nt)
-  ;;         (shell-command "setx HOME %HOME%")))
-  ;;   (SetHOME))
-
-#+end_src
-
-Executables located in directories listed in PATH environment variable can be invoked without its full path like ls, echo and who in Unix-like OS or ipconfig, arp and whoami in Windows. C:\Users\arch\bin> echo %PATH%
-C:\ProgramData\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem...
-
-By adding the directory ~/bin or C:\Users\<user>\bin to PATH variable it makes easir to call command line applications from this directory without specifing its full path from Emacs or shell (cmd.exe).
-
-#+begin_src emacs-lisp
-
-  ;; (progn
-  ;;   (defun SetPATH ()
-  ;;     (interactive)
-  ;;     (if (eq system-type 'windows-nt)
-  ;;         (shell-command "setx PATH \"%PATH%;%USERPROFILE%\\bin\"")))
-  ;;   (SetPATH))
-
-#+end_src
-
-** Git (distributed version control system)
+*** Git (distributed version control system)
 
 Git is a distributed version control system that tracks changes in any set of computer files, usually used for coordinating work among programmers collaboratively developing source code during software development.
 
@@ -70,7 +48,7 @@ Git is a distributed version control system that tracks changes in any set of co
 
 #+end_src
 
-** Gh CLI
+*** Gh CLI
 
 gh cli allow creation of repo on the upstream using the command line. [gh repo create] for creating repository locally. [gh repo create my-project --public --clone] for creating a new remote repository and clone it locally. [gh repo create my-project --private --source=. --remote=upstream] for creating a remote repository from the current directory.
 
@@ -84,50 +62,35 @@ gh cli allow creation of repo on the upstream using the command line. [gh repo c
 
 #+end_src
 
-** Compilation Keybindings
+*** MinGW
 
-Handy key bindings for invoking compilation command.
-
-#+begin_src emacs-lisp
-
-  (progn
-    (global-set-key (kbd "<f9>") #'compile)
-    (global-set-key (kbd "<C-f9>")
-		    (lambda () (interactive)
-		    (save-buffer)
-		    (recompile))))
-
-#+end_src
-
-** Console/Shell
-
-Various command to run in emacs.
+MinGW, formerly mingw32, is a free and open source software development environment to create Microsoft Windows applications. MinGW includes a port of the GNU Compiler Collection, GNU Binutils for Windows, a set of freely distributable Windows specific header files and static import libraries which enable the use of the Windows API, a Windows native build of the GNU Project's GNU Debugger, and miscellaneous utilities.
 
 #+begin_src emacs-lisp
 
-  ;; M-x run-bash
-  (defun run-bash ()
-    (interactive)
-    (let ((shell-file-name "C:\\Program Files\\Git\\bin\\bash.exe"))
-	(shell "*bash*")))
-
-  ;; M-x run-cmdexe
-  (defun run-cmdexe ()
-    (interactive)
-    (let ((shell-file-name "cmd.exe"))
-      (shell "*cmd.exe*")))
-
-  ;; M-x run-powershell
-  (defun run-powershell ()
-    "Run powershell"
-    (interactive)
-    (async-shell-command "c:/windows/system32/WindowsPowerShell/v1.0/powershell.exe -Command -"
-			 nil
-			 nil))
+  ;; (progn
+  ;;   (defun install-mingw ()
+  ;;     (interactive)
+  ;;     (shell-command "choco install mingw"))
+  ;;   (install-mingw)) 
 
 #+end_src
 
-** Visual C++ MSVC Building Tools
+*** CMake
+
+CMake is cross-platform free and open-source software for build automation, testing, packaging and installation of software by using a compiler-independent method. CMake is not a build system itself; it generates another system's build files.
+
+#+begin_src emacs-lisp
+
+  ;; (progn
+  ;;   (defun install-cmake ()
+  ;;     (interactive)
+  ;;     (shell-command "choco install cmake"))
+  ;;   (install-cmake))
+
+#+end_src
+
+*** Visual C++ MSVC Building Tools
 
 Calling the default and official Windows' C++ compiler MSVC (Microsoft Visual C++) from command line is not easy as calling gcc, mingw or clang as MSVC needs environment variables INCLUDE, LIB, LIBPATH and PATH to be properly set with correct paths.
 
@@ -202,6 +165,86 @@ Calling the default and official Windows' C++ compiler MSVC (Microsoft Visual C+
 
 #+end_src
 
+* System Config (Windows-nt)
+
+Custom config variable that Unix based packages expect to exist.
+
+** Env PATH
+
+The HOME environment variable that has the default value /home/<username>) on Linux sets the user's directory path. This variable, which is equivalent to _%USERPROFILE% _(C:\\Users\<username> ) is expected to be set by many Unix applications ported to Windows and it also makes directory browser in Emacs and shells easier.
+
+#+begin_src emacs-lisp
+
+  ;; (progn
+  ;;   (defun SetHOME ()
+  ;;     (interactive)
+  ;;     (if (eq system-type 'windows-nt)
+  ;;         (shell-command "setx HOME %HOME%")))
+  ;;   (SetHOME))
+
+#+end_src
+
+Executables located in directories listed in PATH environment variable can be invoked without its full path like ls, echo and who in Unix-like OS or ipconfig, arp and whoami in Windows.
+
+C:\Users\arch\bin> echo %PATH%
+C:\ProgramData\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem...
+
+By adding the directory ~/bin or C:\Users\<user>\bin to PATH variable it makes easir to call command line applications from this directory without specifing its full path from Emacs or shell (cmd.exe).
+
+#+begin_src emacs-lisp
+
+  ;; (progn
+  ;;   (defun SetPATH ()
+  ;;     (interactive)
+  ;;     (if (eq system-type 'windows-nt)
+  ;;         (shell-command "setx PATH \"%PATH%;%USERPROFILE%\\bin\"")))
+  ;;   (SetPATH))
+
+#+end_src
+
+** Console/Shell
+
+Various command to run in emacs.
+
+#+begin_src emacs-lisp
+
+  ;; M-x run-bash
+  (defun run-bash ()
+    (interactive)
+    (let ((shell-file-name "C:\\Program Files\\Git\\bin\\bash.exe"))
+	(shell "*bash*")))
+
+  ;; M-x run-cmdexe
+  (defun run-cmdexe ()
+    (interactive)
+    (let ((shell-file-name "cmd.exe"))
+      (shell "*cmd.exe*")))
+
+  ;; M-x run-powershell
+  (defun run-powershell ()
+    "Run powershell"
+    (interactive)
+    (async-shell-command "c:/windows/system32/WindowsPowerShell/v1.0/powershell.exe -Command -"
+			 nil
+			 nil))
+
+#+end_src
+
+** Compilation Keybindings
+
+Handy key bindings for invoking compilation command.
+
+#+begin_src emacs-lisp
+
+  (progn
+    (global-set-key (kbd "<f9>") #'compile)
+    (global-set-key (kbd "<C-f9>")
+		    (lambda () (interactive)
+		    (save-buffer)
+		    (recompile))))
+
+#+end_src
+
 ** Custom.el
 
 set package customization to a different file to prevent poluting the init.el
@@ -234,10 +277,6 @@ The following line configures Emacs so that files deleted via Emacs are moved to
   (setq delete-by-moving-to-trash t) 
 
 #+end_src
-
-* Tips for Use
-
-In this document I've added links in many places that lead you to documentation for the various packages we use.  If you're looking at this file in Emacs, you can put your cursor on a link and press =C-c C-o= or run =M-x org-open-at-point= to open the link in your web browser.
 
 * Package System Setup
 
