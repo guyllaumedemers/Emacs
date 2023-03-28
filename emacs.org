@@ -90,6 +90,20 @@ CMake is cross-platform free and open-source software for build automation, test
 
 #+end_src
 
+*** LLVM
+
+LLVM is a set of compiler and toolchain technologies that can be used to develop a front end for any programming language and a back end for any instruction set architecture. LLVM is designed around a language-independent intermediate representation that serves as a portable, high-level assembly language that can be optimized with a variety of transformations over multiple passes.
+
+#+begin_src emacs-lisp
+
+  ;; (progn
+  ;;   (defun install-llvm ()
+  ;;     (interactive)
+  ;;     (shell-command "choco install llvm"))
+  ;;   (install-llvm))
+
+#+end_src
+
 *** Visual C++ MSVC Building Tools
 
 Calling the default and official Windows' C++ compiler MSVC (Microsoft Visual C++) from command line is not easy as calling gcc, mingw or clang as MSVC needs environment variables INCLUDE, LIB, LIBPATH and PATH to be properly set with correct paths.
@@ -733,10 +747,6 @@ The =which-key= integration adds helpful descriptions of the various keys so you
   (add-to-list 'load-path (expand-file-name "lib/lsp-mode" user-emacs-directory))
   (add-to-list 'load-path (expand-file-name "lib/lsp-mode/clients" user-emacs-directory))
 
-  ;; optionally if you want to use debugger
-  ;; (use-package dap-mode)
-  ;; ;; (use-package dap-LANGUAGE) to load the dap adapter for your language
-
 #+end_src
 
 *** lsp-ui
@@ -820,5 +830,18 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
         (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*mingw[a-zA-Z0-9\\\/\.\:\_\+\-]*" elem)
           (setq temp_var elem)
           (add-to-list 'company-c-headers-path-system temp_var)))))
+
+#+end_src
+
+** dap-mode
+
+[[https://emacs-lsp.github.io/dap-mode/][dap-mode]] is an excellent package for bringing rich debugging capabilities to Emacs via the [[https://microsoft.github.io/debug-adapter-protocol/][Debug Adapter Protocol]]. You should check out the [[https://emacs-lsp.github.io/dap-mode/page/configuration/][configuration docs]] to learn how to configure the debugger for your language.  Also make sure to check out the documentation for the debug adapter to see what configuration parameters are available to use for your debug templates!
+
+#+begin_src emacs-lisp
+
+  (use-package dap-mode
+    :config
+    (add-hook 'dap-stopped-hook (lambda (arg) (call-interactively #'dap-hydra)))
+    (require 'dap-gdb-lldb))
 
 #+end_src
