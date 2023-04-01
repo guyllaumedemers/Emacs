@@ -726,6 +726,9 @@ The =which-key= integration adds helpful descriptions of the various keys so you
 
 #+begin_src emacs-lisp
 
+  ;; require by lsp-mode
+  (use-package yasnippet)
+
   (defun efs/lsp-mode-setup ()
     (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
     (lsp-headerline-breadcrumb-mode))
@@ -777,6 +780,14 @@ This package is built on the [[https://github.com/Alexander-Miller/treemacs][tre
 #+begin_src emacs-lisp
 
   (defun efs/toggle-treemacs ()
+    (progn
+      (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
+      (dolist (elem system_path)
+        (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*bin" elem)
+          (setq dir (directory-files elem))
+          (dolist (file dir)
+            (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*python3.[0-9]*.exe" file)
+              (setq treemacs-python-executable (concat elem "\\" file)))))))
     (treemacs)
     (lsp-treemacs-symbols))
 
@@ -839,9 +850,20 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
 
 #+begin_src emacs-lisp
 
+  (defun efs/dap-mode ()
+    (dap-ui-mode 1)
+    (dap-tooltip-mode 1)
+    (tooltip-mode 1)
+    (dap-ui-controls-mode 1))
+
   (use-package dap-mode
+    :init
+    (when (require 'dap-gdb-lldb nil 'noerror)
+      (dap-gdb-lldb-setup))
+    :hook
+    (lsp-deferred . dap-mode)
+    (dap-mode . efs/dap-mode)
     :config
-    (add-hook 'dap-stopped-hook (lambda (arg) (call-interactively #'dap-hydra)))
-    (require 'dap-gdb-lldb))
+    (add-hook 'dap-stopped-hook (lambda (arg) (call-interactively #'dap-hydra))))
 
 #+end_src
