@@ -18,15 +18,12 @@ Set basic requirements for your operating system.
 Chocolatey is a machine-level, command-line package manager and installer for software on Microsoft Windows. It uses the NuGet packaging infrastructure and Windows PowerShell to simplify the process of downloading and installing software.
 
 #+begin_src emacs-lisp
- 
-  ;; (progn
-  ;;   (defun install-chocolatey ()
-  ;;     ;; install chocolatey on window using cmd prompt
-  ;;     (interactive)
-  ;;     (if (eq system-type 'windows-nt)
-  ;;         (shell-command "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))")))
-  ;;   ;; invoke function
-  ;;   (install-chocolatey))
+
+  ;; M-x install-chocolatey
+  (defun install-chocolatey ()
+    (interactive)
+    (if (eq system-type 'windows-nt)
+        (shell-command "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))")))
 
 #+end_src
 
@@ -40,11 +37,10 @@ Git is a distributed version control system that tracks changes in any set of co
 
 #+begin_src emacs-lisp
 
-  ;; (progn
-  ;;   (defun install-git ()
-  ;;     (interactive)
-  ;;     (shell-command "choco install git"))
-  ;;   (install-git))
+  ;; M-x install-git
+  (defun install-git ()
+    (interactive)
+    (shell-command "choco install git"))
 
 #+end_src
 
@@ -54,11 +50,10 @@ gh cli allow creation of repo on the upstream using the command line. [gh repo c
 
 #+begin_src emacs-lisp
 
-  ;; (progn
-  ;;   (defun install-gh ()
-  ;;     (interactive)
-  ;;     (shell-command "choco install gh"))
-  ;;   (install-gh))
+  ;; M-x install-gh
+  (defun install-gh ()
+    (interactive)
+    (shell-command "choco install gh"))
 
 #+end_src
 
@@ -68,11 +63,10 @@ MinGW, formerly mingw32, is a free and open source software development environm
 
 #+begin_src emacs-lisp
 
-  ;; (progn
-  ;;   (defun install-mingw ()
-  ;;     (interactive)
-  ;;     (shell-command "choco install mingw"))
-  ;;   (install-mingw)) 
+  ;; M-x install-mingw
+  (defun install-mingw ()
+    (interactive)
+    (shell-command "choco install mingw"))
 
 #+end_src
 
@@ -82,11 +76,10 @@ CMake is cross-platform free and open-source software for build automation, test
 
 #+begin_src emacs-lisp
 
-  ;; (progn
-  ;;   (defun install-cmake ()
-  ;;     (interactive)
-  ;;     (shell-command "choco install cmake"))
-  ;;   (install-cmake))
+  ;; M-x install-cmake
+  (defun install-cmake ()
+    (interactive)
+    (shell-command "choco install cmake"))
 
 #+end_src
 
@@ -96,11 +89,10 @@ LLVM is a set of compiler and toolchain technologies that can be used to develop
 
 #+begin_src emacs-lisp
 
-  ;; (progn
-  ;;   (defun install-llvm ()
-  ;;     (interactive)
-  ;;     (shell-command "choco install llvm"))
-  ;;   (install-llvm))
+  ;; M-x install-llvm
+  (defun install-llvm ()
+    (interactive)
+    (shell-command "choco install llvm"))
 
 #+end_src
 
@@ -179,6 +171,23 @@ Calling the default and official Windows' C++ compiler MSVC (Microsoft Visual C+
 
 #+end_src
 
+** Languages
+
+Some emacs packages rely on languages like python in order to properly work. The following programming languages are required to be install to prevent package errors. *See Messages buffer for more information on missing requirements*
+
+*** Python3
+
+Python is a high-level, general-purpose programming language. Python is dynamically typed and garbage-collected. It supports multiple programming paradigms, including structured, object-oriented and functional programming. 
+
+#+begin_src emacs-lisp
+
+  ;; M-x install-python
+  (defun install-python ()
+    (interactive)
+    shell-command "choco install python")
+
+#+end_src
+
 * System Config (Windows-nt)
 
 Custom config variable that Unix based packages expect to exist.
@@ -189,12 +198,11 @@ The HOME environment variable that has the default value /home/<username>) on Li
 
 #+begin_src emacs-lisp
 
-  ;; (progn
-  ;;   (defun SetHOME ()
-  ;;     (interactive)
-  ;;     (if (eq system-type 'windows-nt)
-  ;;         (shell-command "setx HOME %HOME%")))
-  ;;   (SetHOME))
+  ;; M-x set-unix-system-home
+  (defun set-unix-system-home ()
+    (interactive)
+    (if (eq system-type 'windows-nt)
+        (shell-command "setx HOME %HOME%")))
 
 #+end_src
 
@@ -207,12 +215,11 @@ By adding the directory ~/bin or C:\Users\<user>\bin to PATH variable it makes e
 
 #+begin_src emacs-lisp
 
-  ;; (progn
-  ;;   (defun SetPATH ()
-  ;;     (interactive)
-  ;;     (if (eq system-type 'windows-nt)
-  ;;         (shell-command "setx PATH \"%PATH%;%USERPROFILE%\\bin\"")))
-  ;;   (SetPATH))
+  ;; M-x set-unix-system-path
+  (defun set-unix-system-path ()
+    (interactive)
+    (if (eq system-type 'windows-nt)
+        (shell-command "setx PATH \"%PATH%;%USERPROFILE%\\bin\"")))
 
 #+end_src
 
