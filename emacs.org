@@ -83,6 +83,70 @@ CMake is cross-platform free and open-source software for build automation, test
 
 #+end_src
 
+**** Build Process
+
+***** Configuration
+
+This stage is about reading project details stored in a directory, called the source tree, and preparing an output directory or build tree for the generation stage.
+
+#+begin_src emacs-lisp
+
+  ;; M-x run-cmake-config to execute the .cmd file created below
+  (defun run-cmake-config ()
+    (interactive)
+    (if (eq system-type 'windows-nt)
+        (shell-command "cmake-config.cmd")))
+
+#+end_src
+
+****** Template
+
+#+begin_src emacs-lisp
+
+  ;; M-x cmake-make-shell-config at project source tree level to generate .cmd file
+  (defun cmake-make-shell-config ()
+    (interactive)
+    (if (eq system-type 'windows-nt)
+        (shell-command "echo cmake -S . -B out\\build >> cmake-config.cmd")))
+
+#+end_src
+
+***** Generation
+
+After reading the project configuration, CMake will generate a *buildsystem* for the exact environment it is working in.
+
+#+begin_src emacs-lisp
+
+  ;; follows the configuration step without user interaction and generate Makefiles or project files
+
+#+end_src
+
+***** Building
+
+Build tools will execute steps to produce *targets* with compilers, linkers, static and dynamic analysis tools, test frameworks, reporting tools, and anything else you can think of.
+
+#+begin_src emacs-lisp
+
+  ;; M-x run-cmake-build to execute the .cmd file created below
+  (defun run-cmake-build ()
+    (interactive)
+    (if (eq system-type 'windows-nt)
+        (shell-command "cmake-build.cmd")))
+
+#+end_src
+
+****** Template
+
+#+begin_src emacs-lisp
+
+  ;; M-x cmake-make-shell-build at project source tree level to generate .cmd file
+  (defun cmake-make-shell-build ()
+    (interactive)
+    (if (eq system-type 'windows-nt)
+	(shell-command "echo cmake --build out\\build >> cmake-build.cmd")))
+
+#+end_src
+
 *** LLVM
 
 LLVM is a set of compiler and toolchain technologies that can be used to develop a front end for any programming language and a back end for any instruction set architecture. LLVM is designed around a language-independent intermediate representation that serves as a portable, high-level assembly language that can be optimized with a variety of transformations over multiple passes.
