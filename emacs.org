@@ -79,7 +79,7 @@ CMake is cross-platform free and open-source software for build automation, test
   ;; M-x install-cmake
   (defun install-cmake ()
     (interactive)
-    (shell-command "choco install cmake"))
+    (shell-command "choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y"))
 
 #+end_src
 
@@ -869,6 +869,12 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
 
 #+begin_src emacs-lisp
 
+  (defun efs/dap-mode-configs ()
+    (dap-ui-mode 1)
+    (dap-tooltip-mode 1)
+    (tooltip-mode 1)
+    (dap-ui-controls-mode 1)) 
+
   (defun efs/dap-cpptools ()
     ;; additional docs: https://docs.doomemacs.org/latest/modules/tools/debugger/ 
     (when (require 'dap-cpptools nil 'noerror)
@@ -883,12 +889,6 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
            :MIMode "gdb"
            :program "${workspaceFolder}/bin/*.exe"
            :cwd "${workspaceFolder}")))
-
-  (defun efs/dap-mode-configs ()
-    (dap-ui-mode 1)
-    (dap-tooltip-mode 1)
-    (tooltip-mode 1)
-    (dap-ui-controls-mode 1)) 
 
   (use-package dap-mode
     :hook
