@@ -107,7 +107,7 @@ This stage is about reading project details stored in a directory, called the so
   (defun cmake-make-shell-config ()
     (interactive)
     (if (eq system-type 'windows-nt)
-        (shell-command "echo cmake -S . -B out\\build >> cmake-config.cmd")))
+        (shell-command "echo cmake -S . -B out\\build -G \"Unix Makefiles\" >> cmake-config.cmd")))
 
 #+end_src
 
@@ -143,7 +143,7 @@ Build tools will execute steps to produce *targets* with compilers, linkers, sta
   (defun cmake-make-shell-build ()
     (interactive)
     (if (eq system-type 'windows-nt)
-	(shell-command "echo cmake --build out\\build >> cmake-build.cmd")))
+        (shell-command "echo cmake --build out\\build >> cmake-build.cmd")))
 
 #+end_src
 
