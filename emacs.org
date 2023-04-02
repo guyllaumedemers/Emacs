@@ -102,71 +102,71 @@ Calling the default and official Windows' C++ compiler MSVC (Microsoft Visual C+
 
 #+begin_src emacs-lisp
 
-;;  (defvar msbuild-old-path-var (getenv "PATH"))
-;;
-;;  ;; The command below sets enviroment variable for MSVC - 2017 and x64 building target
-;;  (defun msbuild-2017-x64-setup ()
-;;    "Set enviorment variables to load Microsoft Visual C++ Compiler (MSVC) 64 bits"
-;;    (interactive)
-;;    (message "Setting 64 bits building tools.")
-;;    (setenv "PATH" msbuild-old-path-var)
-;;    (setenv "INCLUDE"
-;;	    (concat
-;;	     "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/ATLMFC/include"
-;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/include"
-;;	     ";" "C:/Program Files (x86)/Windows Kits/NETFXSDK/4.6.1/include/um"
-;;	     ";" "C:/Program Files (x86)/Windows Kits/10/include/10.0.16299.0/ucrt"
-;;	     ";" "C:/Program Files (x86)/Windows Kits/10/include/10.0.16299.0/shared"
-;;	     ";" "C:/Program Files (x86)/Windows Kits/10/include/10.0.16299.0/um"
-;;	     ";" "C:/Program Files (x86)/Windows Kits/10/include/10.0.16299.0/winrt"
-;;	     ))
-;;
-;;    (setenv "LIB"
-;;	    (concat
-;;	     "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/ATLMFC/lib/x64"
-;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/lib/x64"
-;;	     ";" "C:/Program Files (x86)/Windows Kits/NETFXSDK/4.6.1/lib/um/x64"
-;;	     ";" "C:/Program Files (x86)/Windows Kits/10/lib/10.0.16299.0/ucrt/x64"
-;;	     ";" "C:/Program Files (x86)/Windows Kits/10/lib/10.0.16299.0/um/x64"             
-;;	     ))
-;;
-;;    (setenv  "LIBPATH"
-;;	     (concat
-;;	      "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/ATLMFC/lib/x64"
-;;	      ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/lib/x64"
-;;	      ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/lib/x64/store/references"
-;;	      ";" "C:/Program Files (x86)/Windows Kits/10/UnionMetadata/10.0.16299.0"
-;;	      ";" "C:/Program Files (x86)/Windows Kits/10/References/10.0.16299.0"
-;;	      ";" "C:/Windows/Microsoft.NET/Framework/v4.0.30319"
-;;	      ))
-;;
-;;    (setenv "PATH"
-;;	    (concat
-;;	     (getenv "PATH")
-;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX86/x64"
-;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/VC/VCPackages"
-;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow"
-;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/CommonExtensions/Microsoft/TeamFoundation/Team Explorer"
-;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/bin/Roslyn"
-;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Team Tools/Performance Tools"
-;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/Shared/Common/VSPerfCollectionTools/"
-;;	     ";" "C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.6.1 Tools/"
-;;	     ";" "C:/Program Files (x86)/Microsoft SDKs/F#/4.1/Framework/v4.0/"
-;;	     ";" "C:/Program Files (x86)/Windows Kits/10/bin/x64"
-;;	     ";" "C:/Program Files (x86)/Windows Kits/10/bin/10.0.16299.0/x64"
-;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community//MSBuild/15.0/bin"
-;;	     ";" "C:/Windows/Microsoft.NET/Framework/v4.0.30319"
-;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/"
-;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/Tools/"
-;;	     )))
+  ;;  (defvar msbuild-old-path-var (getenv "PATH"))
+  ;;
+  ;;  ;; The command below sets enviroment variable for MSVC - 2017 and x64 building target
+  ;;  (defun msbuild-2017-x64-setup ()
+  ;;    "Set enviorment variables to load Microsoft Visual C++ Compiler (MSVC) 64 bits"
+  ;;    (interactive)
+  ;;    (message "Setting 64 bits building tools.")
+  ;;    (setenv "PATH" msbuild-old-path-var)
+  ;;    (setenv "INCLUDE"
+  ;;	    (concat
+  ;;	     "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/ATLMFC/include"
+  ;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/include"
+  ;;	     ";" "C:/Program Files (x86)/Windows Kits/NETFXSDK/4.6.1/include/um"
+  ;;	     ";" "C:/Program Files (x86)/Windows Kits/10/include/10.0.16299.0/ucrt"
+  ;;	     ";" "C:/Program Files (x86)/Windows Kits/10/include/10.0.16299.0/shared"
+  ;;	     ";" "C:/Program Files (x86)/Windows Kits/10/include/10.0.16299.0/um"
+  ;;	     ";" "C:/Program Files (x86)/Windows Kits/10/include/10.0.16299.0/winrt"
+  ;;	     ))
+  ;;
+  ;;    (setenv "LIB"
+  ;;	    (concat
+  ;;	     "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/ATLMFC/lib/x64"
+  ;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/lib/x64"
+  ;;	     ";" "C:/Program Files (x86)/Windows Kits/NETFXSDK/4.6.1/lib/um/x64"
+  ;;	     ";" "C:/Program Files (x86)/Windows Kits/10/lib/10.0.16299.0/ucrt/x64"
+  ;;	     ";" "C:/Program Files (x86)/Windows Kits/10/lib/10.0.16299.0/um/x64"             
+  ;;	     ))
+  ;;
+  ;;    (setenv  "LIBPATH"
+  ;;	     (concat
+  ;;	      "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/ATLMFC/lib/x64"
+  ;;	      ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/lib/x64"
+  ;;	      ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/lib/x64/store/references"
+  ;;	      ";" "C:/Program Files (x86)/Windows Kits/10/UnionMetadata/10.0.16299.0"
+  ;;	      ";" "C:/Program Files (x86)/Windows Kits/10/References/10.0.16299.0"
+  ;;	      ";" "C:/Windows/Microsoft.NET/Framework/v4.0.30319"
+  ;;	      ))
+  ;;
+  ;;    (setenv "PATH"
+  ;;	    (concat
+  ;;	     (getenv "PATH")
+  ;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Tools/MSVC/14.12.25827/bin/HostX86/x64"
+  ;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/VC/VCPackages"
+  ;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/CommonExtensions/Microsoft/TestWindow"
+  ;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/CommonExtensions/Microsoft/TeamFoundation/Team Explorer"
+  ;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/MSBuild/15.0/bin/Roslyn"
+  ;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Team Tools/Performance Tools"
+  ;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/Shared/Common/VSPerfCollectionTools/"
+  ;;	     ";" "C:/Program Files (x86)/Microsoft SDKs/Windows/v10.0A/bin/NETFX 4.6.1 Tools/"
+  ;;	     ";" "C:/Program Files (x86)/Microsoft SDKs/F#/4.1/Framework/v4.0/"
+  ;;	     ";" "C:/Program Files (x86)/Windows Kits/10/bin/x64"
+  ;;	     ";" "C:/Program Files (x86)/Windows Kits/10/bin/10.0.16299.0/x64"
+  ;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community//MSBuild/15.0/bin"
+  ;;	     ";" "C:/Windows/Microsoft.NET/Framework/v4.0.30319"
+  ;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/IDE/"
+  ;;	     ";" "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/Common7/Tools/"
+  ;;	     )))
 
   ;; commands to compile file related to current c++ buffer.
   (defun compile-msvc-x64 ()
     (interactive)
     (msbuild-2017-x64-setup)
     (let ((compile-command (format "cl.exe \"%s\""
-				   (file-name-nondirectory (buffer-file-name))))
-	  (compilation-ask-about-save nil))
+                                   (file-name-nondirectory (buffer-file-name))))
+          (compilation-ask-about-save nil))
       (call-interactively #'compile )))
 
 #+end_src
@@ -184,7 +184,7 @@ Python is a high-level, general-purpose programming language. Python is dynamica
   ;; M-x install-python
   (defun install-python ()
     (interactive)
-    shell-command "choco install python")
+    (shell-command "choco install python"))
 
 #+end_src
 
@@ -233,7 +233,7 @@ Various command to run in emacs.
   (defun run-bash ()
     (interactive)
     (let ((shell-file-name "C:\\Program Files\\Git\\bin\\bash.exe"))
-	(shell "*bash*")))
+      (shell "*bash*")))
 
   ;; M-x run-cmdexe
   (defun run-cmdexe ()
@@ -246,8 +246,8 @@ Various command to run in emacs.
     "Run powershell"
     (interactive)
     (async-shell-command "c:/windows/system32/WindowsPowerShell/v1.0/powershell.exe -Command -"
-			 nil
-			 nil))
+                         nil
+                         nil))
 
 #+end_src
 
@@ -260,9 +260,9 @@ Handy key bindings for invoking compilation command.
   (progn
     (global-set-key (kbd "<f9>") #'compile)
     (global-set-key (kbd "<C-f9>")
-		    (lambda () (interactive)
-		    (save-buffer)
-		    (recompile))))
+                    (lambda () (interactive)
+                      (save-buffer)
+                      (recompile))))
 
 #+end_src
 
@@ -305,22 +305,21 @@ Emacs has a built in package manager but it doesn't make it easy to automaticall
 
 #+begin_src emacs-lisp
 
-  ;; init package sources
-  (when (require 'package nil 'noerror)
+  (progn
+    ;; init package sources
+    (when (require 'package nil 'noerror)
       (setq package-archives '(
-			       ("melpa" . "https://melpa.org/packages/")
-			       ("org" . "https://orgmode.org/elpa/")
-			       ("elpa" . "https://elpa.gnu.org/packages/")))
+                               ("melpa" . "https://melpa.org/packages/")
+                               ("org" . "https://orgmode.org/elpa/")
+                               ("elpa" . "https://elpa.gnu.org/packages/")))
       (package-initialize)
       ;; refresh archive description list
-      (unless package-archive-contents (package-refresh-contents)))
-
-  ;; install/update use-package
-  (unless (package-installed-p 'use-package)
-    (package-install 'use-package))
-
-  (when (require 'use-package nil 'noerror)
-    (setq use-package-always-ensure t))
+      (unless package-archive-contents (package-refresh-contents))
+      ;; install/update use-package
+      (unless (package-installed-p 'use-package) (package-install 'use-package))
+      ;; use-package ensure config
+      (when (require 'use-package nil 'noerror)
+        (setq use-package-always-ensure t))))
 
 #+end_src
 
@@ -347,11 +346,11 @@ This section configures basic UI settings that remove unneeded elements to make 
     (setq-default buffer-file-coding-system 'utf-8-unix)
     ;; Disable line numbers for some modes
     (dolist (mode '(
-		    org-mode-hook
-		    term-mode-hook
-		    shell-mode-hook
-		    treemacs-mode-hook
-		    eshell-mode-hook))
+                    org-mode-hook
+                    term-mode-hook
+                    shell-mode-hook
+                    treemacs-mode-hook
+                    eshell-mode-hook))
       (add-hook mode (lambda () (display-line-numbers-mode 0)))))
 
 #+end_src
@@ -366,38 +365,34 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
   (use-package general
-     :config
-     (general-create-definer rune/leader-keys
-       :keymaps '(normal insert visual emacs)
-       :prefix "SPC"
-       :global-prefix "C-SPC")
+    :config
+    (general-create-definer rune/leader-keys
+      :keymaps '(normal insert visual emacs)
+      :prefix "SPC"
+      :global-prefix "C-SPC")
+    (rune/leader-keys
+      "t"  '(:ignore t :which-key "toggles")
+      "tt" '(counsel-load-theme :which-key "choose theme"))) 
 
-     (rune/leader-keys
-       "t"  '(:ignore t :which-key "toggles")
-       "tt" '(counsel-load-theme :which-key "choose theme"))) 
+  (use-package evil
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+    (setq evil-want-C-u-scroll t)
+    (setq evil-want-C-i-jump nil)
+    :config
+    (evil-mode 1)
+    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+    (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+    (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+    (evil-set-initial-state 'messages-buffer-mode 'normal)
+    (evil-set-initial-state 'dashboard-mode 'normal))
 
-   (use-package evil
-     :init
-     (setq evil-want-integration t)
-     (setq evil-want-keybinding nil)
-     (setq evil-want-C-u-scroll t)
-     (setq evil-want-C-i-jump nil)
-     :config
-     (evil-mode 1)
-     (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-     (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+  (use-package evil-collection
+    :config
+    (evil-collection-init))
 
-     ;; Use visual line motions even outside of visual-line-mode buffers
-     (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-     (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
-
-     (evil-set-initial-state 'messages-buffer-mode 'normal)
-     (evil-set-initial-state 'dashboard-mode 'normal))
-
-   (use-package evil-collection
-     :config
-     (evil-collection-init))
-  
 #+end_src
 
 * UI Configuration
@@ -407,9 +402,6 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
 I am using the [[https://github.com/tonsky/FiraCode][Fira Code]] font for this configuration which will more than likely need to be installed on your machine.
 
 #+begin_src emacs-lisp
-
-  ;; NOTE: init.el is now generated from Emacs.org.  Please edit that file
-  ;;       in Emacs and init.el will be generated automatically!
 
   (progn
     (defvar efs/default-font-size 96)
@@ -428,7 +420,8 @@ I am using the [[https://github.com/tonsky/FiraCode][Fira Code]] font for this c
 #+begin_src emacs-lisp
 
   (use-package doom-themes
-    :init (load-theme 'doom-dracula t))
+    :init
+    (load-theme 'doom-dracula t))
 
 #+end_src
 
@@ -444,13 +437,14 @@ I am using the [[https://github.com/tonsky/FiraCode][Fira Code]] font for this c
     :if (display-graphic-p))
 
   (use-package all-the-icons-dired
-    :config (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
+    :hook
+    (dired-mode . all-the-icons-dired-mode))
 
   (use-package doom-modeline
-    :init
-    (doom-modeline-mode 1)
     :custom
-    (doom-modeline-height 15))
+    (doom-modeline-height 15)
+    :init
+    (doom-modeline-mode 1))
 
 #+end_src
 
@@ -462,7 +456,8 @@ I am using the [[https://github.com/tonsky/FiraCode][Fira Code]] font for this c
 
   (use-package which-key
     :diminish which-key-mode
-    :init (which-key-mode)
+    :init
+    (which-key-mode)
     :config
     (setq which-key-idle-delay 1))
 
@@ -476,37 +471,38 @@ I am using the [[https://github.com/tonsky/FiraCode][Fira Code]] font for this c
 
 #+begin_src emacs-lisp
 
-   (use-package ivy
-     :diminish
-     :bind (("C-s" . swiper)
-	    :map ivy-minibuffer-map
-	    ("TAB" . ivy-alt-done)
-	    ("C-l" . ivy-alt-done)
-	    ("C-j" . ivy-next-line)
-	    ("C-k" . ivy-previous-line)
-	    :map ivy-switch-buffer-map
-	    ("C-k" . ivy-previous-line)
-	    ("C-l" . ivy-done)
-	    ("C-d" . ivy-switch-buffer-kill)
-	    :map ivy-reverse-i-search-map
-	    ("C-k" . ivy-previous-line)
-	    ("C-d" . ivy-reverse-i-search-kill))
-     :config
-     (ivy-mode 1))
+  (use-package ivy
+    :diminish
+    :bind (("C-s" . swiper)
+           :map ivy-minibuffer-map
+           ("TAB" . ivy-alt-done)
+           ("C-l" . ivy-alt-done)
+           ("C-j" . ivy-next-line)
+           ("C-k" . ivy-previous-line)
+           :map ivy-switch-buffer-map
+           ("C-k" . ivy-previous-line)
+           ("C-l" . ivy-done)
+           ("C-d" . ivy-switch-buffer-kill)
+           :map ivy-reverse-i-search-map
+           ("C-k" . ivy-previous-line)
+           ("C-d" . ivy-reverse-i-search-kill))
+    :config
+    (ivy-mode 1))
 
   (use-package all-the-icons-ivy-rich
-    :init (all-the-icons-ivy-rich-mode 1))
+    :init
+    (all-the-icons-ivy-rich-mode 1))
 
-   (use-package ivy-rich
-     :init
-     (ivy-rich-mode 1))
+  (use-package ivy-rich
+    :init
+    (ivy-rich-mode 1))
 
-   (use-package counsel
-     :bind (("C-M-j" . 'counsel-switch-buffer)
-	    :map minibuffer-local-map
-	    ("C-r" . 'counsel-minibuffer-history))
-     :config
-     (counsel-mode 1))
+  (use-package counsel
+    :bind (("C-M-j" . 'counsel-switch-buffer)
+           :map minibuffer-local-map
+           ("C-r" . 'counsel-minibuffer-history))
+    :config
+    (counsel-mode 1))
 
 #+end_src
 
@@ -541,18 +537,18 @@ The =efs/org-font-setup= function configures various text faces to tweak the siz
   (defun efs/org-font-setup ()
     ;; Replace list hyphen with dot
     (font-lock-add-keywords 'org-mode
-			    '(("^ *\\([-]\\) "
-			       (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+                            '(("^ *\\([-]\\) "
+                               (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 
     ;; Set faces for heading levels
     (dolist (face '((org-level-1 . 1.2)
-		    (org-level-2 . 1.1)
-		    (org-level-3 . 1.05)
-		    (org-level-4 . 1.0)
-		    (org-level-5 . 1.1)
-		    (org-level-6 . 1.1)
-		    (org-level-7 . 1.1)
-		    (org-level-8 . 1.1)))
+                    (org-level-2 . 1.1)
+                    (org-level-3 . 1.05)
+                    (org-level-4 . 1.0)
+                    (org-level-5 . 1.1)
+                    (org-level-6 . 1.1)
+                    (org-level-7 . 1.1)
+                    (org-level-8 . 1.1)))
       (set-face-attribute (car face) nil :font "Fira Code Retina" :weight 'regular :height (cdr face)))
 
     ;; Ensure that anything that should be fixed-pitch in Org files appears that way
@@ -578,7 +574,8 @@ This section contains the basic configuration for =org-mode= plus the configurat
     (visual-line-mode 1))
 
   (use-package org
-    :hook (org-mode . efs/org-mode-setup)
+    :hook
+    (org-mode . efs/org-mode-setup)
     :config
     (setq org-ellipsis " ▾")
     (efs/org-font-setup))
@@ -592,9 +589,10 @@ This section contains the basic configuration for =org-mode= plus the configurat
 #+begin_src emacs-lisp
 
   (use-package org-bullets
-    :hook (org-mode . org-bullets-mode)
     :custom
-    (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+    (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●"))
+    :hook
+    (org-mode . org-bullets-mode))
 
 #+end_src
 
@@ -609,7 +607,8 @@ We use [[https://github.com/joostkremers/visual-fill-column][visual-fill-column]
     (visual-fill-column-mode 1))
 
   (use-package visual-fill-column
-    :hook (org-mode . efs/org-mode-visual-fill))
+    :hook
+    (org-mode . efs/org-mode-visual-fill))
 
 #+end_src
 
@@ -647,11 +646,10 @@ This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-con
 
   ;; Automatically tangle our Emacs.org config file when we save it
   (defun efs/org-babel-tangle-config ()
-    (when (string-equal (buffer-file-name)
-			(expand-file-name "~/.emacs.d/emacs.org"))
+    (when (string-equal (buffer-file-name) (expand-file-name "~/.emacs.d/emacs.org"))
       ;; Dynamic scoping to the rescue
       (let ((org-confirm-babel-evaluate nil))
-	(org-babel-tangle))))
+        (org-babel-tangle))))
 
   (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'efs/org-babel-tangle-config)))
 
@@ -667,18 +665,19 @@ This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-con
 
   (use-package projectile
     :diminish projectile-mode
-    :config (projectile-mode)
-    :custom ((projectile-completion-system 'ivy))
-    :bind-keymap
-    ("C-c p" . projectile-command-map)
+    :custom (projectile-completion-system 'ivy) 
+    :bind-keymap ("C-c p" . projectile-command-map)
     :init
     ;; NOTE: Set this to the folder where you keep your Git repos!
     (when (file-directory-p "~/Projects/Code")
-      (setq projectile-project-search-path '("~/Projects/Code")))
-    (setq projectile-switch-project-action #'projectile-dired))
+      (setq projectile-project-search-path '("~/Projects/Code"))
+      (setq projectile-switch-project-action #'projectile-dired))
+    :config
+    (projectile-mode))
 
-  (use-package counsel-projectile
-    :config (counsel-projectile-mode))
+    (use-package counsel-projectile
+      :config
+      (counsel-projectile-mode))
 
 #+end_src
 
@@ -688,6 +687,7 @@ This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-con
 
 #+begin_src emacs-lisp
 
+  ;; set magit package after forge so forge-add-default-bindings are disabled in magit
   (use-package magit
     :custom
     (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
@@ -695,7 +695,7 @@ This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-con
   ;; NOTE: Make sure to configure a GitHub token before using this package!
   ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
   ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
-  (use-package forge)
+  (use-package forge) 
 
 #+end_src
 
@@ -717,7 +717,8 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
 #+begin_src emacs-lisp
 
   (use-package rainbow-delimiters
-    :hook (prog-mode . rainbow-delimiters-mode))
+    :hook
+    (prog-mode . rainbow-delimiters-mode))
 
 #+end_src
 
@@ -741,21 +742,21 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     (lsp-headerline-breadcrumb-mode))
 
   (use-package lsp-mode
+    :commands (lsp lsp-deferred)
     :init
     ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
     (setq lsp-keymap-prefix "C-c l")
-    :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-           (c-mode . lsp-deferred)
-           (c++-mode . lsp-deferred)
-           ;; if you want which-key integration
-           (lsp-mode . lsp-enable-which-key-integration)
-           (lsp-mode . efs/lsp-mode-setup))
-    :commands (lsp lsp-deferred))
-
-  ;; The path to lsp-mode needs to be added to load-path as well as the
-  ;; path to the `clients' subdirectory.
-  (add-to-list 'load-path (expand-file-name "lib/lsp-mode" user-emacs-directory))
-  (add-to-list 'load-path (expand-file-name "lib/lsp-mode/clients" user-emacs-directory))
+    :hook
+    (c-mode . lsp-deferred)
+    (c++-mode . lsp-deferred)
+    ;; if you want which-key integration
+    (lsp-mode . lsp-enable-which-key-integration)
+    (lsp-mode . efs/lsp-mode-setup)
+    :config
+    ;; The path to lsp-mode needs to be added to load-path as well as the
+    ;; path to the `clients' subdirectory.
+    (add-to-list 'load-path (expand-file-name "lib/lsp-mode" user-emacs-directory))
+    (add-to-list 'load-path (expand-file-name "lib/lsp-mode/clients" user-emacs-directory)))
 
 #+end_src
 
@@ -766,9 +767,10 @@ The =which-key= integration adds helpful descriptions of the various keys so you
 #+begin_src emacs-lisp
 
   (use-package lsp-ui
-    :hook (lsp-mode . lsp-ui-mode)
     :custom
-    (lsp-ui-doc-position 'bottom))
+    (lsp-ui-doc-position 'bottom)
+    :hook
+    (lsp-mode . lsp-ui-mode))
 
 #+end_src
 
@@ -786,21 +788,26 @@ This package is built on the [[https://github.com/Alexander-Miller/treemacs][tre
 
 #+begin_src emacs-lisp
 
+  (defun efs/treemacs-config ()
+    (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
+    (dolist (elem system_path)
+      (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*bin" elem)
+        (setq dir (directory-files elem))
+        (dolist (file dir)
+          (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*python3.[0-9]*.exe" file)
+            (setq treemacs-python-executable (concat elem "\\" file)))))))
+
   (defun efs/toggle-treemacs ()
-    (progn
-      (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
-      (dolist (elem system_path)
-        (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*bin" elem)
-          (setq dir (directory-files elem))
-          (dolist (file dir)
-            (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*python3.[0-9]*.exe" file)
-              (setq treemacs-python-executable (concat elem "\\" file)))))))
     (treemacs)
     (lsp-treemacs-symbols))
 
   (use-package lsp-treemacs
-    :hook (lsp-mode . efs/toggle-treemacs)
-    :config (lsp-treemacs-sync-mode t))
+    :init
+    (efs/treemacs-config)
+    :hook
+    (lsp-mode . efs/toggle-treemacs)
+    :config
+    (lsp-treemacs-sync-mode t))
 
 #+end_src
 
@@ -828,26 +835,31 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
 #+begin_src emacs-lisp
 
   (use-package company
-    :hook (lsp-mode . company-mode)
+    :custom
+    (company-minimum-prefix-length 1)
+    (company-idle-delay 0.0)
     :bind (:map company-active-map
                 ("<tab>" . company-complete-selection))
     (:map lsp-mode-map
           ("<tab>" . company-indent-or-complete-common))
-    :custom
-    (company-minimum-prefix-length 1)
-    (company-idle-delay 0.0))
+    :hook
+    (lsp-mode . company-mode))
 
   (use-package company-box
-    :hook (company-mode . company-box-mode))
+    :hook
+    (company-mode . company-box-mode))
+
+  (defun efs/company-c-headers-config ()
+    (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
+    (dolist (elem system_path)
+      (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*mingw[a-zA-Z0-9\\\/\.\:\_\+\-]*" elem)
+        (setq temp_var elem)
+        (add-to-list 'company-c-headers-path-system temp_var))))
 
   (use-package company-c-headers
-    :config (add-to-list 'company-backends 'company-c-headers)
-    (progn
-      (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
-      (dolist (elem system_path)
-        (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*mingw[a-zA-Z0-9\\\/\.\:\_\+\-]*" elem)
-          (setq temp_var elem)
-          (add-to-list 'company-c-headers-path-system temp_var)))))
+    :config
+    (add-to-list 'company-backends 'company-c-headers)
+    (efs/company-c-headers-config))
 
 #+end_src
 
@@ -857,20 +869,34 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
 
 #+begin_src emacs-lisp
 
-  (defun efs/dap-mode ()
+  (defun efs/dap-cpptools ()
+    ;; additional docs: https://docs.doomemacs.org/latest/modules/tools/debugger/ 
+    (when (require 'dap-cpptools nil 'noerror)
+      (dap-cpptools-setup)))
+
+  (defun efs/dap-register-debug-template ()
+    (dap-register-debug-template
+     "cpptools::Run Configuration"
+     (list :type "cppdbg"
+           :request "launch"
+           :name "cpptools::Run Configuration"
+           :MIMode "gdb"
+           :program "${workspaceFolder}/bin/*.exe"
+           :cwd "${workspaceFolder}")))
+
+  (defun efs/dap-mode-configs ()
     (dap-ui-mode 1)
     (dap-tooltip-mode 1)
     (tooltip-mode 1)
-    (dap-ui-controls-mode 1))
+    (dap-ui-controls-mode 1)) 
 
   (use-package dap-mode
-    :init
-    (when (require 'dap-gdb-lldb nil 'noerror)
-      (dap-gdb-lldb-setup))
     :hook
     (lsp-deferred . dap-mode)
-    (dap-mode . efs/dap-mode)
+    (dap-mode . efs/dap-cpptools)
+    (dap-mode . efs/dap-mode-configs)
     :config
-    (add-hook 'dap-stopped-hook (lambda (arg) (call-interactively #'dap-hydra))))
+    (add-hook 'dap-stopped-hook (lambda (arg) (call-interactively #'dap-hydra)))
+    (efs/dap-register-debug-template))
 
 #+end_src
