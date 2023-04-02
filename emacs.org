@@ -40,7 +40,7 @@ Git is a distributed version control system that tracks changes in any set of co
   ;; M-x install-git
   (defun install-git ()
     (interactive)
-    (shell-command "choco install git"))
+    (shell-command "choco install git -y"))
 
 #+end_src
 
@@ -53,7 +53,7 @@ gh cli allow creation of repo on the upstream using the command line. [gh repo c
   ;; M-x install-gh
   (defun install-gh ()
     (interactive)
-    (shell-command "choco install gh"))
+    (shell-command "choco install gh -y"))
 
 #+end_src
 
@@ -66,7 +66,7 @@ MinGW, formerly mingw32, is a free and open source software development environm
   ;; M-x install-mingw
   (defun install-mingw ()
     (interactive)
-    (shell-command "choco install mingw"))
+    (shell-command "choco install mingw -y"))
 
 #+end_src
 
@@ -92,7 +92,7 @@ LLVM is a set of compiler and toolchain technologies that can be used to develop
   ;; M-x install-llvm
   (defun install-llvm ()
     (interactive)
-    (shell-command "choco install llvm"))
+    (shell-command "choco install llvm -y"))
 
 #+end_src
 
@@ -184,7 +184,7 @@ Python is a high-level, general-purpose programming language. Python is dynamica
   ;; M-x install-python
   (defun install-python ()
     (interactive)
-    (shell-command "choco install python"))
+    (shell-command "choco install python -y"))
 
 #+end_src
 
