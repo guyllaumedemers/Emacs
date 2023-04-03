@@ -85,6 +85,8 @@ CMake is cross-platform free and open-source software for build automation, test
 
 **** Build Process
 
+CMake build system generator key steps to create build system required files.
+
 ***** Configuration
 
 This stage is about reading project details stored in a directory, called the source tree, and preparing an output directory or build tree for the generation stage.
@@ -103,11 +105,13 @@ This stage is about reading project details stored in a directory, called the so
 
 #+begin_src emacs-lisp
 
+  (setq build_system "\"Unix Makefiles\"")
+
   ;; M-x cmake-make-shell-config at project source tree level to generate .cmd file
   (defun cmake-make-shell-config ()
     (interactive)
     (if (eq system-type 'windows-nt)
-        (shell-command "echo cmake -S . -B out\\build -G \"Unix Makefiles\" >> cmake-config.cmd")))
+        (shell-command (format "echo cmake -S . -B out\\build -G %s -D CMAKE_BUILD_TYPE=DEBUG >> cmake-config.cmd" build_system))))
 
 #+end_src
 
@@ -144,6 +148,33 @@ Build tools will execute steps to produce *targets* with compilers, linkers, sta
     (interactive)
     (if (eq system-type 'windows-nt)
         (shell-command "echo cmake --build out\\build >> cmake-build.cmd")))
+
+#+end_src
+
+**** Debugging and Tracing
+
+CMake can be run with a multitude of options that allow you to peek under the hood. To get general information about variables, commands, macroa, and other settings.
+
+#+begin_src emacs-lisp
+
+  ;; M-x run-cmake-debugtrack to execute the .cmd file created below
+  (defun run-cmake-debug-trace (&optional file)
+    (interactive "sOutput filename: ")
+    (if (eq system-type 'windows-nt)
+        (shell-command (format "cmake --system-information %s" file))))
+
+#+end_src
+
+*** Make
+
+Make is a build automation tool that automatically builds executable programs and libraries from source code by reading files called Makefiles which specify how to derive the target program.
+
+#+begin_src emacs-lisp
+
+  ;; M-x install-make
+  (defun install-make ()
+    (interactive)
+    (shell-command "choco install make -y"))
 
 #+end_src
 
