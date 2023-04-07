@@ -79,7 +79,7 @@ CMake is cross-platform free and open-source software for build automation, test
   ;; M-x install-cmake
   (defun install-cmake ()
     (interactive)
-    (shell-command "choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y"))
+    (shell-command "choco install cmake --installargs '\"ADD_CMAKE_TO_PATH=User\"' --use-remembered-arguments -y"))
 
 #+end_src
 
@@ -106,12 +106,14 @@ This stage is about reading project details stored in a directory, called the so
 #+begin_src emacs-lisp
 
   (setq build_system "\"Unix Makefiles\"")
+  (setq c_compiler "\'clang")
+  (setq c++_compiler "\'clang++")
 
   ;; M-x cmake-make-shell-config at project source tree level to generate .cmd file
   (defun cmake-make-shell-config ()
     (interactive)
     (if (eq system-type 'windows-nt)
-        (shell-command (format "echo cmake -S . -B out\\build -G %s -D CMAKE_BUILD_TYPE=DEBUG >> cmake-config.cmd" build_system))))
+        (shell-command (format "echo cmake -S . -B out\\build -G %s -D CMAKE_BUILD_TYPE=DEBUG -D CMAKE_C_COMPILER=%s -D CMAKE_CXX_COMPILER=%s > cmake-config.cmd" build_system c_compiler c++_compiler))))
 
 #+end_src
 
@@ -147,24 +149,42 @@ Build tools will execute steps to produce *targets* with compilers, linkers, sta
   (defun cmake-make-shell-build ()
     (interactive)
     (if (eq system-type 'windows-nt)
-        (shell-command "echo cmake --build out\\build >> cmake-build.cmd")))
+        (shell-command "echo cmake --build out\\build > cmake-build.cmd")))
 
 #+end_src
 
 **** Debugging and Tracing
 
-CMake can be run with a multitude of options that allow you to peek under the hood. To get general information about variables, commands, macroa, and other settings.
+CMake can be run with a multitude of options that allow you to peek under the hood. To get general information about variables, commands, macro, and other settings.
 
 #+begin_src emacs-lisp
 
   ;; M-x run-cmake-debugtrack to execute the .cmd file created below
   (defun run-cmake-debug-trace (&optional file)
-    (interactive "sOutput filename: ")
+    (interactive "sOutput file name: ")
     (if (eq system-type 'windows-nt)
         (shell-command (format "cmake --system-information %s" file))))
 
 #+end_src
 
+**** Project Templates
+
+A few template files to properly start with CMake.
+
+***** CMakeLists.txt
+
+Root listfile. 
+
+#+begin_src emacs-lisp
+
+  (setq cmake_version (car (last (split-string (car (split-string (shell-command-to-string "cmake --version") "\n")) " "))))
+
+  (defun cmake-make-root-listfile (&optional project)
+    (interactive "sProject name: ")
+    (with-temp-file ".\\CMakeLists.txt"
+      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s)" cmake_version project))))
+
+#+end_src
 *** Make
 
 Make is a build automation tool that automatically builds executable programs and libraries from source code by reading files called Makefiles which specify how to derive the target program.
