@@ -181,7 +181,7 @@ Root listfile.
 
   (defun cmake-make-root-listfile (&optional project)
     (interactive "sProject name: ")
-    (with-temp-file ".\\CMakeLists.txt"
+    (with-temp-file "CMakeLists.txt"
       (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s)" cmake_version project))))
 
 #+end_src
