@@ -193,9 +193,11 @@ Setup the current directory as follow:
 	  
 #+end_src
 
+Run the following command at directory to create the above tree-like directories.
+
 #+begin_src emacs-lisp
 
-  ;; M-x cmake-init-project-dir
+  ;; M-x cmake-init-project-dir - env SHELL set lower to make this possible 
   (defun cmake-init-project-dir ()
     (interactive)
     (if (eq system-type 'windows-nt)
@@ -228,6 +230,8 @@ Root listfile.
 A set of modules to be used in cmake projects.
 
 ****** GitSubmodules
+
+A git module that synch-update your project submodules.
 
 #+begin_src emacs-lisp
 
@@ -953,24 +957,45 @@ The =which-key= integration adds helpful descriptions of the various keys so you
 
 #+begin_src emacs-lisp
 
-  ;; require by lsp-mode
+  ;; required by lsp-mode
   (use-package yasnippet)
 
   (defun efs/lsp-mode-setup ()
     (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
     (lsp-headerline-breadcrumb-mode))
 
+  ;; set target language server protocol
+  (defun efs/lsp-clients-exe-setup ()
+    (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
+    (dolist (dir system_path)
+      (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*LLVM" dir)
+        (setq subdir (directory-files dir))
+        (dolist (file subdir)
+          (when (string-match "clangd.exe" file)
+            (setq exec file)
+            (setq lsp-clients-clangd-executable (format "%s\\%s" dir exec)))))))
+
+  ;; set target lib used by lsp
+  (defun efs/lsp-clients-lib-setup ()
+    (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
+    (dolist (elem system_path)
+      (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*mingw[a-zA-Z0-9\\\/\.\:\_\+\-]*include" elem)
+        (setq temp_var elem)
+        (add-to-list 'lsp-clients-clangd-library-directories temp_var))))
+
   (use-package lsp-mode
     :commands (lsp lsp-deferred)
     :init
     ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
     (setq lsp-keymap-prefix "C-c l")
+    (efs/lsp-clients-exe-setup)
     :hook
     (c-mode . lsp-deferred)
     (c++-mode . lsp-deferred)
     ;; if you want which-key integration
     (lsp-mode . lsp-enable-which-key-integration)
     (lsp-mode . efs/lsp-mode-setup)
+    (lsp-mode . efs/lsp-clients-lib-setup)
     :config
     ;; The path to lsp-mode needs to be added to load-path as well as the
     ;; path to the `clients' subdirectory.
@@ -1071,7 +1096,7 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
   (defun efs/company-c-headers-config ()
     (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
     (dolist (elem system_path)
-      (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*mingw[a-zA-Z0-9\\\/\.\:\_\+\-]*" elem)
+      (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*mingw[a-zA-Z0-9\\\/\.\:\_\+\-]*include" elem)
         (setq temp_var elem)
         (add-to-list 'company-c-headers-path-system temp_var))))
 
