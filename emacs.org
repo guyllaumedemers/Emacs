@@ -104,6 +104,8 @@ This stage is about reading project details stored in a directory, called the so
 
 ****** Template
 
+https://clang.llvm.org/docs/JSONCompilationDatabase.html
+
 #+begin_src emacs-lisp
 
   (setq build_system "\"Unix Makefiles\"")
