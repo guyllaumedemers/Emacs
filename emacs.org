@@ -114,7 +114,7 @@ This stage is about reading project details stored in a directory, called the so
   (defun cmake-init-shell-config ()
     (interactive)
     (if (eq system-type 'windows-nt)
-        (shell-command (format "echo cmake -S . -B out\\build -G %s -D CMAKE_BUILD_TYPE=DEBUG -D CMAKE_C_COMPILER=%s -D CMAKE_CXX_COMPILER=%s > cmake-config.cmd" build_system c_compiler c++_compiler))))
+        (shell-command (format "echo cmake -S . -B out\\build -G %s -D CMAKE_BUILD_TYPE=DEBUG -D CMAKE_C_COMPILER=%s -D CMAKE_CXX_COMPILER=%s -D CMAKE_EXPORT_COMPILE_COMMANDS=1 > cmake-config.cmd" build_system c_compiler c++_compiler))))
 
 #+end_src
 
@@ -218,6 +218,34 @@ Root listfile.
     (interactive "sProject name: ")
     (with-temp-file "CMakeLists.txt"
       (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s)" cmake_version project))))
+
+#+end_src
+
+***** Modules
+
+A set of modules to be used in cmake projects.
+
+****** GitSubmodules
+
+#+begin_src emacs-lisp
+
+  (defun cmake-init-git-module ()
+    (interactive)
+    (with-temp-file "git.cmake"
+      (insert "find_package(Git QUIET)
+  if(GIT_FOUND AND EXISTS \"${CMAKE_SOURCE_DIR}/.git\")
+  # Update submodules as needed
+      option(GIT_SUBMODULE \"Check submodules during build\" ON)
+      if(GIT_SUBMODULE)
+          message(STATUS \"Submodule update\")
+          execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+                          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                          RESULT_VARIABLE GIT_SUBMOD_RESULT)
+          if(NOT GIT_SUBMOD_RESULT EQUAL \"0\")
+              message(FATAL_ERROR \"git submodule update --init --recursive failed with ${GIT_SUBMOD_RESULT}, please checkout submodules\")
+          endif()
+      endif()
+  endif()")))
 
 #+end_src
 
@@ -391,9 +419,8 @@ Executables for bash.
 
 #+begin_src emacs-lisp
 
-  ;; INTERNAL USE ONLY - DONT CALL
+  ;; set %SHELL%
   (defun set-system-shell (&optional shell)
-    (interactive)
     (when (eq system-type 'windows-nt)
       (shell-command (format "setx SHELL %s" shell))
       (setq shell-file-name shell)))
@@ -1066,7 +1093,7 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
     (dap-ui-controls-mode 1)) 
 
   (defun efs/dap-cpptools ()
-    ;; additional docs: https://docs.doomemacs.org/latest/modules/tools/debugger/ 
+    ;; additional docs: [[https://docs.doomemacs.org/latest/modules/tools/debugger/][blog]]   
     (when (require 'dap-cpptools nil 'noerror)
       (dap-cpptools-setup)))
 
@@ -1088,5 +1115,23 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
     :config
     (add-hook 'dap-stopped-hook (lambda (arg) (call-interactively #'dap-hydra)))
     (efs/dap-register-debug-template))
+
+#+end_src
+
+#+RESULTS:
+| efs/dap-mode-configs | efs/dap-cpptools |
+
+** cmake-ide
+
+cmake-ide is a package to enable IDE-like features on Emacs for CMake projects. It also supports non-CMake projects as long as a compilation database is generated out-of-band.This includes autocompletion and on-the-fly syntax checking in Emacs for CMake projects with minimal configuration.
+
+#+begin_src emacs-lisp
+
+  ;; required by cmake-ide
+  ;; (use-package rtags)
+
+  ;; (use-package cmake-ide
+  ;;   :config
+  ;;   (cmake-ide-setup))
 
 #+end_src
