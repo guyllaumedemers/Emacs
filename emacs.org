@@ -985,8 +985,7 @@ This package is built on the [[https://github.com/Alexander-Miller/treemacs][tre
         (setq dir (directory-files elem))
         (dolist (file dir)
           (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*python3.[0-9]*.exe" file)
-            (setq treemacs-python-executable (concat elem "\\" file))
-            (return))))))
+            (setq treemacs-python-executable (concat elem "\\" file)))))))
 
   (defun efs/toggle-treemacs ()
     (treemacs)
