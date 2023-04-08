@@ -1,3 +1,4 @@
+
 #+title: Emacs From Scratch Configuration
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 
@@ -40,7 +41,7 @@ Git is a distributed version control system that tracks changes in any set of co
   ;; M-x install-git
   (defun install-git ()
     (interactive)
-    (shell-command "choco install git -y"))
+    (shell-command "choco install git --params \"'/GitAndUnixToolsOnPath'\" --use-remembered-arguments -y"))
 
 #+end_src
 
@@ -72,7 +73,7 @@ MinGW, formerly mingw32, is a free and open source software development environm
 
 *** CMake
 
-CMake is cross-platform free and open-source software for build automation, testing, packaging and installation of software by using a compiler-independent method. CMake is not a build system itself; it generates another system's build files.
+CMake is cross-platform free and open-source software for build automation, testing, packaging and installation of software by using a compiler-independent method. CMake is not a build system itself; it generates another system's build files. [[https://github.com/chocolatey-community/chocolatey-packages/issues/987][Chocolatey CMAKE_PATH issue]]
 
 #+begin_src emacs-lisp
 
@@ -109,8 +110,8 @@ This stage is about reading project details stored in a directory, called the so
   (setq c_compiler "\'clang")
   (setq c++_compiler "\'clang++")
 
-  ;; M-x cmake-make-shell-config at project source tree level to generate .cmd file
-  (defun cmake-make-shell-config ()
+  ;; M-x cmake-init-shell-config at project source tree level to generate .cmd file
+  (defun cmake-init-shell-config ()
     (interactive)
     (if (eq system-type 'windows-nt)
         (shell-command (format "echo cmake -S . -B out\\build -G %s -D CMAKE_BUILD_TYPE=DEBUG -D CMAKE_C_COMPILER=%s -D CMAKE_CXX_COMPILER=%s > cmake-config.cmd" build_system c_compiler c++_compiler))))
@@ -145,31 +146,64 @@ Build tools will execute steps to produce *targets* with compilers, linkers, sta
 
 #+begin_src emacs-lisp
 
-  ;; M-x cmake-make-shell-build at project source tree level to generate .cmd file
-  (defun cmake-make-shell-build ()
+  ;; M-x cmake-init-shell-build at project source tree level to generate .cmd file
+  (defun cmake-init-shell-build ()
     (interactive)
     (if (eq system-type 'windows-nt)
         (shell-command "echo cmake --build out\\build > cmake-build.cmd")))
 
 #+end_src
 
-**** Debugging and Tracing
-
-CMake can be run with a multitude of options that allow you to peek under the hood. To get general information about variables, commands, macro, and other settings.
-
-#+begin_src emacs-lisp
-
-  ;; M-x run-cmake-debugtrack to execute the .cmd file created below
-  (defun run-cmake-debug-trace (&optional file)
-    (interactive "sOutput file name: ")
-    (if (eq system-type 'windows-nt)
-        (shell-command (format "cmake --system-information %s" file))))
-
-#+end_src
-
 **** Project Templates
 
 A few template files to properly start with CMake.
+
+***** Directory
+
+Setup the current directory as follow:
+
+#+begin_src ditaa
+
+  root     
+  |
+  +--cmake
+  |  +---*.cmake
+  +--doc
+  +--extern
+  +--out
+  |  +---build
+  |  |   +----DEBUG
+  |  |   +----RELEASE
+  +--res
+  +--src
+  |  +---App1
+  |  |   +---includes
+  |  |   +---src
+  |  |   +---test
+  |  +---Main.cpp
+  +--test
+  +--.git
+  +--.gitsubmodules
+  +--CMakeLists.txt
+  +--README.md
+  +--cmake-config.cmd
+  +--cmake-build.cmd
+	  
+#+end_src
+
+#+begin_src emacs-lisp
+
+  ;; M-x cmake-init-project-dir
+  (defun cmake-init-project-dir ()
+    (interactive)
+    (if (eq system-type 'windows-nt)
+        (progn
+          (shell-command "mkdir -p {cmake,doc,extern,out,res,src,test}")
+          (setq dir_folders (split-string (shell-command-to-string "ls -A1") "\n"))
+          (dolist (elem dir_folders)
+            (shell-command (format "touch > '%s\\\.keep'" elem))))))
+
+#+end_src
 
 ***** CMakeLists.txt
 
@@ -179,12 +213,27 @@ Root listfile.
 
   (setq cmake_version (car (last (split-string (car (split-string (shell-command-to-string "cmake --version") "\n")) " "))))
 
-  (defun cmake-make-root-listfile (&optional project)
+  ;; M-x cmake-init-root-cmakelist
+  (defun cmake-init-root-cmakelist (&optional project)
     (interactive "sProject name: ")
     (with-temp-file "CMakeLists.txt"
       (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s)" cmake_version project))))
 
 #+end_src
+
+**** Debugging and Tracing
+
+CMake can be run with a multitude of options that allow you to peek under the hood. To get general information about variables, commands, macro, and other settings.
+
+#+begin_src emacs-lisp
+
+  ;; M-x run-cmake-debug-trace
+  (defun run-cmake-debug-trace (&optional file)
+    (interactive "sOutput file name: ")
+    (shell-command (format "cmake --system-information %s" file)))
+
+#+end_src
+
 *** Make
 
 Make is a build automation tool that automatically builds executable programs and libraries from source code by reading files called Makefiles which specify how to derive the target program.
@@ -335,6 +384,32 @@ By adding the directory ~/bin or C:\Users\<user>\bin to PATH variable it makes e
     (interactive)
     (if (eq system-type 'windows-nt)
         (shell-command "setx PATH \"%PATH%;%USERPROFILE%\\bin\"")))
+
+#+end_src
+
+Executables for bash.
+
+#+begin_src emacs-lisp
+
+  ;; INTERNAL USE ONLY - DONT CALL
+  (defun set-system-shell (&optional shell)
+    (interactive)
+    (when (eq system-type 'windows-nt)
+      (shell-command (format "setx SHELL %s" shell))
+      (setq shell-file-name shell)))
+
+  ;; M-x find-and-set-shell-bash
+  (defun find-and-set-shell-bash ()
+    (interactive)
+    (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
+    (dolist (dir system_path)
+      (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*Git" dir)
+        (setq subdir (directory-files dir))
+        (dolist (file subdir)
+          (when (string-match "bash.exe" file)
+            (setq exec file)
+            (set-system-shell (format "%s\\%s" dir exec))
+            (return))))))
 
 #+end_src
 
@@ -910,7 +985,8 @@ This package is built on the [[https://github.com/Alexander-Miller/treemacs][tre
         (setq dir (directory-files elem))
         (dolist (file dir)
           (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*python3.[0-9]*.exe" file)
-            (setq treemacs-python-executable (concat elem "\\" file)))))))
+            (setq treemacs-python-executable (concat elem "\\" file))
+            (return))))))
 
   (defun efs/toggle-treemacs ()
     (treemacs)
