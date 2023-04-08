@@ -1120,10 +1120,17 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
 
 #+end_src
 
-#+RESULTS:
-| efs/dap-mode-configs | efs/dap-cpptools |
+** cmake-mode
 
-** cmake-ide
+Provides syntax highlighting and indentation for CMakeLists.txt and *.cmake source files.
+
+#+begin_src emacs-lisp
+
+  (use-package cmake-mode)
+
+#+end_src
+
+**** cmake-ide
 
 cmake-ide is a package to enable IDE-like features on Emacs for CMake projects. It also supports non-CMake projects as long as a compilation database is generated out-of-band.This includes autocompletion and on-the-fly syntax checking in Emacs for CMake projects with minimal configuration.
 
