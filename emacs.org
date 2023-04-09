@@ -97,8 +97,7 @@ This stage is about reading project details stored in a directory, called the so
   ;; M-x run-cmake-config to execute the .cmd file created below
   (defun run-cmake-config ()
     (interactive)
-    (if (eq system-type 'windows-nt)
-        (shell-command "cmake-config.cmd")))
+    (shell-command "./cmake-config.sh"))
 
 #+end_src
 
@@ -108,15 +107,15 @@ https://clang.llvm.org/docs/JSONCompilationDatabase.html
 
 #+begin_src emacs-lisp
 
-  (setq build_system "\"Unix Makefiles\"")
-  (setq c_compiler "\'clang")
-  (setq c++_compiler "\'clang++")
+  (setq build_system "\'Unix Makefiles\'")
+  (setq compilation_mode "\'DEBUG\'")
+  (setq c_compiler "\'clang\'")
+  (setq c++_compiler "\'clang++\'")
 
   ;; M-x cmake-init-shell-config at project source tree level to generate .cmd file
   (defun cmake-init-shell-config ()
     (interactive)
-    (if (eq system-type 'windows-nt)
-        (shell-command (format "echo 'cmake -S . -B out\\build -G %s -D CMAKE_BUILD_TYPE=DEBUG -D CMAKE_C_COMPILER=%s -D CMAKE_CXX_COMPILER=%s -D CMAKE_EXPORT_COMPILE_COMMANDS=1' > cmake-config.cmd" build_system c_compiler c++_compiler))))
+    (shell-command (format "echo cmake -S . -B \"\'out\\build\'\" -G \"%s\" -D CMAKE_BUILD_TYPE=\"%s\" -D CMAKE_C_COMPILER=\"%s\" -D CMAKE_CXX_COMPILER=\"%s\" -D CMAKE_EXPORT_COMPILE_COMMANDS=1 > cmake-config.sh" build_system compilation_mode c_compiler c++_compiler)))
 
 #+end_src
 
@@ -139,8 +138,7 @@ Build tools will execute steps to produce *targets* with compilers, linkers, sta
   ;; M-x run-cmake-build to execute the .cmd file created below
   (defun run-cmake-build ()
     (interactive)
-    (if (eq system-type 'windows-nt)
-        (shell-command "cmake-build.cmd")))
+    (shell-command "./cmake-build.sh"))
 
 #+end_src
 
@@ -151,8 +149,7 @@ Build tools will execute steps to produce *targets* with compilers, linkers, sta
   ;; M-x cmake-init-shell-build at project source tree level to generate .cmd file
   (defun cmake-init-shell-build ()
     (interactive)
-    (if (eq system-type 'windows-nt)
-        (shell-command "echo cmake --build out\\build > cmake-build.cmd")))
+    (shell-command "echo cmake --build \"\'out\\build\'\" > cmake-build.sh"))
 
 #+end_src
 
@@ -188,8 +185,8 @@ Setup the current directory as follow:
   +--.gitsubmodules
   +--CMakeLists.txt
   +--README.md
-  +--cmake-config.cmd
-  +--cmake-build.cmd
+  +--cmake-config.sh
+  +--cmake-build.sh
 	  
 #+end_src
 
@@ -200,12 +197,10 @@ Run the following command at directory to create the above tree-like directories
   ;; M-x cmake-init-project-dir - env SHELL set lower to make this possible 
   (defun cmake-init-project-dir ()
     (interactive)
-    (if (eq system-type 'windows-nt)
-        (progn
-          (shell-command "mkdir -p {cmake,doc,extern,out,res,src,test}")
-          (setq dir_folders (split-string (shell-command-to-string "ls -A1") "\n"))
-          (dolist (elem dir_folders)
-            (shell-command (format "touch > '%s\\\.keep'" elem))))))
+    (shell-command "mkdir -p {cmake,doc,extern,out,res,src,test}")
+    (setq dir_folders (split-string (shell-command-to-string "ls -A1") "\n"))
+    (dolist (elem dir_folders)
+      (shell-command (format "touch > '%s\\\.keep'" elem))))
 
 #+end_src
 
