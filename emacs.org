@@ -216,7 +216,18 @@ Root listfile.
   (defun cmake-init-root-cmakelist (&optional project)
     (interactive "sProject name: ")
     (with-temp-file "CMakeLists.txt"
-      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s)" cmake_version project))))
+      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nadd_subdirectory(\"doc\")\nadd_subdirectory(\"extern\")\nadd_subdirectory(\"src\")\nadd_subdirectory(\"test\")" cmake_version project))))
+
+#+end_src
+
+Src listfile.
+
+#+begin_src emacs-lisp
+
+  (defun cmake-init-src-cmakelist ()
+    (interactive)
+    (with-temp-file "CMakeLists.txt"
+      (insert (format))))
 
 #+end_src
 
@@ -235,17 +246,17 @@ A git module that synch-update your project submodules.
     (with-temp-file "git.cmake"
       (insert "find_package(Git QUIET)
   if(GIT_FOUND AND EXISTS \"${CMAKE_SOURCE_DIR}/.git\")
-  # Update submodules as needed
-      option(GIT_SUBMODULE \"Check submodules during build\" ON)
-      if(GIT_SUBMODULE)
-          message(STATUS \"Submodule update\")
-          execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-                          WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                          RESULT_VARIABLE GIT_SUBMOD_RESULT)
-          if(NOT GIT_SUBMOD_RESULT EQUAL \"0\")
-              message(FATAL_ERROR \"git submodule update --init --recursive failed with ${GIT_SUBMOD_RESULT}, please checkout submodules\")
-          endif()
+    # Update submodules as needed
+    option(GIT_SUBMODULE \"Check submodules during build\" ON)
+    if(GIT_SUBMODULE)
+      message(STATUS \"Submodule update\")
+      execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        RESULT_VARIABLE GIT_SUBMOD_RESULT)
+      if(NOT GIT_SUBMOD_RESULT EQUAL \"0\")
+        message(FATAL_ERROR \"git submodule update --init --recursive failed with ${GIT_SUBMOD_RESULT}, please checkout submodules\")
       endif()
+    endif()
   endif()")))
 
 #+end_src
