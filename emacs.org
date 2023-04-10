@@ -220,7 +220,7 @@ Run the following command at directory to create the Application tree-like direc
     (setq dir_folders (split-string (shell-command-to-string (format "cd %s && ls -d */" app)) "\n"))
     (dolist (elem dir_folders)
       (message elem)
-      (shell-command (format "touch > %s\\.keep" elem))))
+      (shell-command (format "cd %s && touch > %s\\.keep" app elem))))
 
 #+end_src
 
