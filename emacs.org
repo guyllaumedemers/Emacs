@@ -115,6 +115,7 @@ https://clang.llvm.org/docs/JSONCompilationDatabase.html
   ;; M-x cmake-init-shell-config at project source tree level to generate .cmd file
   (defun cmake-init-shell-config ()
     (interactive)
+    ;; note: string output in .sh later invoke in bash shell so \ behaviour need to be handled twice
     (shell-command (format "echo cmake -S . -B \"\'out\\build\'\" -G \"%s\" -D CMAKE_BUILD_TYPE=\"%s\" -D CMAKE_C_COMPILER=\"%s\" -D CMAKE_CXX_COMPILER=\"%s\" -D CMAKE_EXPORT_COMPILE_COMMANDS=1 > cmake-config.sh" build_system compilation_mode c_compiler c++_compiler)))
 
 #+end_src
@@ -149,6 +150,7 @@ Build tools will execute steps to produce *targets* with compilers, linkers, sta
   ;; M-x cmake-init-shell-build at project source tree level to generate .cmd file
   (defun cmake-init-shell-build ()
     (interactive)
+    ;; note: string output in .sh later invoke in bash shell so \ behaviour need to be handled twice
     (shell-command "echo cmake --build \"\'out\\build\'\" > cmake-build.sh"))
 
 #+end_src
@@ -179,7 +181,9 @@ Setup the current directory as follow:
   |  |   +---includes
   |  |   +---src
   |  |   +---test
+  |  |   +---CMakeLists.txt   
   |  +---Main.cpp
+  |  +---CMakeLists.txt
   +--test
   +--.git
   +--.gitsubmodules
@@ -187,7 +191,7 @@ Setup the current directory as follow:
   +--README.md
   +--cmake-config.sh
   +--cmake-build.sh
-	  
+
 #+end_src
 
 Run the following command at directory to create the above tree-like directories.
@@ -198,9 +202,25 @@ Run the following command at directory to create the above tree-like directories
   (defun cmake-init-project-dir ()
     (interactive)
     (shell-command "mkdir -p {cmake,doc,extern,out,res,src,test}")
-    (setq dir_folders (split-string (shell-command-to-string "ls -A1") "\n"))
+    (setq dir_folders (split-string (shell-command-to-string "ls -d */") "\n"))
     (dolist (elem dir_folders)
-      (shell-command (format "touch > '%s\\\.keep'" elem))))
+      (message elem)
+      (shell-command (format "touch > %s\\.keep" elem))))
+
+#+end_src
+
+Run the following command at directory to create the Application tree-like directories.
+
+#+begin_src emacs-lisp
+
+  (defun cmake-init-application-dir (&optional app)
+    (interactive "sApplication name: ")
+    (cmake-init-app-cmakelist app)
+    (shell-command (format "mkdir -p %s && cd %s && mkdir -p {includes,src,test}" app app))
+    (setq dir_folders (split-string (shell-command-to-string (format "cd %s && ls -d */" app)) "\n"))
+    (dolist (elem dir_folders)
+      (message elem)
+      (shell-command (format "touch > %s\\.keep" elem))))
 
 #+end_src
 
@@ -224,10 +244,9 @@ Src listfile.
 
 #+begin_src emacs-lisp
 
-  (defun cmake-init-src-cmakelist ()
-    (interactive)
+  (defun cmake-init-app-cmakelist (&optional app)
     (with-temp-file "CMakeLists.txt"
-      (insert (format))))
+      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nadd_library(\${PROJECT_NAME} OBJECT)\ntarget_include_directories(\${PROJECT_NAME} PUBLIC .)" cmake_version app))))
 
 #+end_src
 
