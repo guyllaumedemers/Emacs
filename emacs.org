@@ -198,10 +198,13 @@ Run the following command at directory to create the above tree-like directories
 
 #+begin_src emacs-lisp
 
-  ;; M-x cmake-init-project-dir - env SHELL set lower to make this possible 
-  (defun cmake-init-project-dir ()
-    (interactive)
-    (shell-command "mkdir -p {cmake,doc,extern,out,res,src,test}")
+  ;; Call this first when starting a new project
+
+  ;; M-x init-project-root-dir - create the root directory tree
+  (defun init-project-root-dir (&optional project)
+    (interactive "sProject name: ")
+    (shell-command (format "mkdir -p %s" project))
+    (shell-command (format "cd %s && mkdir -p {cmake,doc,extern,out,res,src,test}" project))
     (setq dir_folders (split-string (shell-command-to-string "ls -d */") "\n"))
     (dolist (elem dir_folders)
       (message elem)
@@ -213,9 +216,9 @@ Run the following command at directory to create the Application tree-like direc
 
 #+begin_src emacs-lisp
 
-  (defun cmake-init-application-dir (&optional app)
+  ;; M-x init-project-src-application-dir - create the application directory tree
+  (defun init-project-src-application-dir (&optional app)
     (interactive "sApplication name: ")
-    (cmake-init-app-cmakelist app)
     (shell-command (format "mkdir -p %s && cd %s && mkdir -p {includes,src,test}" app app))
     (setq dir_folders (split-string (shell-command-to-string (format "cd %s && ls -d */" app)) "\n"))
     (dolist (elem dir_folders)
@@ -226,17 +229,19 @@ Run the following command at directory to create the Application tree-like direc
 
 ***** CMakeLists.txt
 
-Root listfile. 
+Root listfile.
 
 #+begin_src emacs-lisp
 
   (setq cmake_version (car (last (split-string (car (split-string (shell-command-to-string "cmake --version") "\n")) " "))))
 
-  ;; M-x cmake-init-root-cmakelist
+  ;; Internal use ONLY - create top-level CMakeLists.txt
   (defun cmake-init-root-cmakelist (&optional project)
-    (interactive "sProject name: ")
     (with-temp-file "CMakeLists.txt"
-      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nadd_subdirectory(\"doc\")\nadd_subdirectory(\"extern\")\nadd_subdirectory(\"src\")\nadd_subdirectory(\"test\")" cmake_version project))))
+      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nadd_subdirectory(\"doc\")\nadd_subdirectory(\"extern\")\nadd_subdirectory(\"src\" \"bin\")\nadd_subdirectory(\"test\")" cmake_version project)))
+    (dolist (elem (list "doc" "extern" "test"))
+      (with-temp-file (format "%s\\CMakeLists.txt" elem)
+        (insert (format "")))))
 
 #+end_src
 
@@ -244,9 +249,33 @@ Src listfile.
 
 #+begin_src emacs-lisp
 
-  (defun cmake-init-app-cmakelist (&optional app)
+  ;; Internal use ONLY - create src-level CMakeLists.txt
+  (defun cmake-init-src-cmakelist (&optional app)
     (with-temp-file "CMakeLists.txt"
-      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nadd_library(\${PROJECT_NAME} OBJECT)\ntarget_include_directories(\${PROJECT_NAME} PUBLIC .)" cmake_version app))))
+      (insert (format "add_subdirectory(\"%s\")" app))))
+
+#+end_src
+
+Application listfile.
+
+#+begin_src emacs-lisp
+
+  ;; Internal use ONLY - create app-level CMakeLists.txt
+  (defun cmake-init-app-cmakelist (&optional app)
+    (with-temp-file (format "%s\\CMakeLists.txt" app)
+      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nfile(GLOB_RECURSE \"${PROJECT_NAME}_SRC\" \"${CMAKE_CURRENT_SOURCE_DIR}\" \"*.cpp\")\n\nadd_library(\"${PROJECT_NAME}\" OBJECT \"${PROJECT_NAME}_SRC\")\ntarget_include_directories(\"${PROJECT_NAME}\" PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/includes\")" cmake_version app))))
+
+#+end_src
+
+***** Main.cc
+
+Hello World.cc
+
+#+begin_src emacs-lisp
+
+  (defun init-main-cc (&optional app)
+    (with-temp-file (format "%s\\Main.cc" app)
+      (insert "#pragma once\n\n#include <cstdio>\n\nint main(int argc, char* argv[])\n{\n\tstd::printf(\"HelloWorld!\");\n}")))
 
 #+end_src
 
@@ -277,6 +306,19 @@ A git module that synch-update your project submodules.
       endif()
     endif()
   endif()")))
+
+#+end_src
+
+***** Master Command
+
+A master command to easilly initialize your project with the correct startup files using the commands defined above.
+
+#+begin_src emacs-lisp
+
+  ;; (defun init-project (&optional project &optional app)
+  ;;   (interactive "sProject name: %s \n sApplication name: %s")
+  ;;   (init-project-root-dir project)
+  ;;   (init-project-src-application-dir app))
 
 #+end_src
 
