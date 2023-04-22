@@ -198,17 +198,15 @@ Run the following command at directory to create the above tree-like directories
 
 #+begin_src emacs-lisp
 
-  ;; Call this first when starting a new project
-
   ;; M-x init-project-root-dir - create the root directory tree
   (defun init-project-root-dir (&optional project)
     (interactive "sProject name: ")
-    (shell-command (format "mkdir -p %s" project))
-    (shell-command (format "cd %s && mkdir -p {cmake,doc,extern,out,res,src,test}" project))
-    (setq dir_folders (split-string (shell-command-to-string "ls -d */") "\n"))
+    (shell-command (format "mkdir -p %s && cd %s && mkdir -p {cmake,doc,extern,out,res,src,test}" project project))
+    (setq dir_folders (split-string (shell-command-to-string (format "cd %s && ls -d */" project)) "\n"))
     (dolist (elem dir_folders)
-      (message elem)
-      (shell-command (format "touch > %s\\.keep" elem))))
+      (setq match (car (member elem (list "doc/" "extern/" "test/"))))
+      (if match (shell-command (format "cd %s && touch > %s\\CMakeLists.txt" project match)))
+      (shell-command (format "cd %s && touch > %s\\.keep" project elem))))
 
 #+end_src
 
@@ -219,10 +217,9 @@ Run the following command at directory to create the Application tree-like direc
   ;; M-x init-project-src-application-dir - create the application directory tree
   (defun init-project-src-application-dir (&optional app)
     (interactive "sApplication name: ")
-    (shell-command (format "mkdir -p %s && cd %s && mkdir -p {includes,src,test}" app app))
+    (shell-command (format "mkdir -p %s && cd %s && mkdir -p {includes,lib3,test}" app app))
     (setq dir_folders (split-string (shell-command-to-string (format "cd %s && ls -d */" app)) "\n"))
     (dolist (elem dir_folders)
-      (message elem)
       (shell-command (format "cd %s && touch > %s\\.keep" app elem))))
 
 #+end_src
@@ -237,11 +234,9 @@ Root listfile.
 
   ;; Internal use ONLY - create top-level CMakeLists.txt
   (defun cmake-init-root-cmakelist (&optional project)
+    (interactive "sProject name: ")
     (with-temp-file "CMakeLists.txt"
-      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nadd_subdirectory(\"doc\")\nadd_subdirectory(\"extern\")\nadd_subdirectory(\"src\" \"bin\")\nadd_subdirectory(\"test\")" cmake_version project)))
-    (dolist (elem (list "doc" "extern" "test"))
-      (with-temp-file (format "%s\\CMakeLists.txt" elem)
-        (insert (format "")))))
+      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nadd_subdirectory(\"doc\")\nadd_subdirectory(\"extern\")\nadd_subdirectory(\"src\" \"bin\")\nadd_subdirectory(\"test\")" cmake_version project))))
 
 #+end_src
 
@@ -251,6 +246,7 @@ Src listfile.
 
   ;; Internal use ONLY - create src-level CMakeLists.txt
   (defun cmake-init-src-cmakelist (&optional app)
+    (interactive "sSubdirectory name: ")
     (with-temp-file "CMakeLists.txt"
       (insert (format "add_subdirectory(\"%s\")" app))))
 
@@ -262,7 +258,8 @@ Application listfile.
 
   ;; Internal use ONLY - create app-level CMakeLists.txt
   (defun cmake-init-app-cmakelist (&optional app)
-    (with-temp-file (format "%s\\CMakeLists.txt" app)
+    (interactive "sApplication name: ")
+    (with-temp-file "CMakeLists.txt"
       (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nfile(GLOB_RECURSE \"${PROJECT_NAME}_SRC\" \"${CMAKE_CURRENT_SOURCE_DIR}\" \"*.cpp\")\n\nadd_library(\"${PROJECT_NAME}\" OBJECT \"${PROJECT_NAME}_SRC\")\ntarget_include_directories(\"${PROJECT_NAME}\" PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/includes\")" cmake_version app))))
 
 #+end_src
@@ -273,8 +270,9 @@ Hello World.cc
 
 #+begin_src emacs-lisp
 
-  (defun init-main-cc (&optional app)
-    (with-temp-file (format "%s\\Main.cc" app)
+  (defun init-main-cc ()
+    (interactive)
+    (with-temp-file "Main.cc"
       (insert "#pragma once\n\n#include <cstdio>\n\nint main(int argc, char* argv[])\n{\n\tstd::printf(\"HelloWorld!\");\n}")))
 
 #+end_src
@@ -315,10 +313,8 @@ A master command to easilly initialize your project with the correct startup fil
 
 #+begin_src emacs-lisp
 
-  ;; (defun init-project (&optional project &optional app)
-  ;;   (interactive "sProject name: %s \n sApplication name: %s")
-  ;;   (init-project-root-dir project)
-  ;;   (init-project-src-application-dir app))
+  ;; spend time figuring out how to invoke emacs command from the shell terminal
+  ;; without opening a new emacs frame
 
 #+end_src
 
