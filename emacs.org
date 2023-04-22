@@ -45,6 +45,122 @@ Git is a distributed version control system that tracks changes in any set of co
 
 #+end_src
 
+**** Gitignore
+
+#+begin_src emacs-lisp
+
+  (defun init-gitignore ()
+      (interactive)
+      (with-temp-file "\.gitignore"
+        (insert "# Created by https://www.toptal.com/developers/gitignore/api/cmake,c++,c
+  # Edit at https://www.toptal.com/developers/gitignore?templates=cmake,c++,c
+
+  ### C ###
+  # Prerequisites
+  ,*.d
+
+  # Object files
+  ,*.o
+  ,*.ko
+  ,*.obj
+  ,*.elf
+
+  # Linker output
+  ,*.ilk
+  ,*.map
+  ,*.exp
+
+  # Precompiled Headers
+  ,*.gch
+  ,*.pch
+
+  # Libraries
+  ,*.lib
+  ,*.a
+  ,*.la
+  ,*.lo
+
+  # Shared objects (inc. Windows DLLs)
+  ,*.dll
+  ,*.so
+  ,*.so.*
+  ,*.dylib
+
+  # Executables
+  ,*.exe
+  ,*.out
+  ,*.app
+  ,*.i*86
+  ,*.x86_64
+  ,*.hex
+
+  # Debug files
+  ,*.dSYM/
+  ,*.su
+  ,*.idb
+  ,*.pdb
+
+  # Kernel Module Compile Results
+  ,*.mod*
+  ,*.cmd
+  .tmp_versions/
+  modules.order
+  Module.symvers
+  Mkfile.old
+  dkms.conf
+
+  ### C++ ###
+  # Prerequisites
+
+  # Compiled Object files
+  ,*.slo
+
+  # Precompiled Headers
+
+  # Compiled Dynamic libraries
+
+  # Fortran module files
+  ,*.mod
+  ,*.smod
+
+  # Compiled Static libraries
+  ,*.lai
+
+  # Executables
+
+  ### CMake ###
+  CMakeLists.txt.user
+  CMakeCache.txt
+  CMakeFiles
+  CMakeScripts
+  Testing
+  Makefile
+  cmake_install.cmake
+  install_manifest.txt
+  compile_commands.json
+  CTestTestfile.cmake
+  _deps
+
+  ### CMake Patch ###
+  # External projects
+  ,*-prefix/
+
+  # End of https://www.toptal.com/developers/gitignore/api/cmake,c++,c
+
+  ### wildcard removing trash files created by vim, notepad++
+  ,*.bak
+  ,*.un~
+  ,*.txt~
+  ,*~
+
+  ### remove build dir
+  out/*
+
+  ### remove visual studio chached dir
+  .vs")))
+
+#+end_src
+
 *** Gh CLI
 
 gh cli allow creation of repo on the upstream using the command line. [gh repo create] for creating repository locally. [gh repo create my-project --public --clone] for creating a new remote repository and clone it locally. [gh repo create my-project --private --source=. --remote=upstream] for creating a remote repository from the current directory.
@@ -260,7 +376,7 @@ Application listfile.
   (defun cmake-init-app-cmakelist (&optional app)
     (interactive "sApplication name: ")
     (with-temp-file "CMakeLists.txt"
-      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nfile(GLOB_RECURSE \"${PROJECT_NAME}_SRC\" \"${CMAKE_CURRENT_SOURCE_DIR}\" \"*.cpp\")\n\nadd_library(\"${PROJECT_NAME}\" OBJECT \"${PROJECT_NAME}_SRC\")\ntarget_include_directories(\"${PROJECT_NAME}\" PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/includes\")" cmake_version app))))
+      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nfile(GLOB_RECURSE \"${PROJECT_NAME}_SRC\" \"${CMAKE_CURRENT_SOURCE_DIR}\" \"*.cc\")\n\nadd_library(\"${PROJECT_NAME}lib\" STATIC \"${PROJECT_NAME}_SRC\")\ntarget_include_directories(\"${PROJECT_NAME}\" PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/includes\")\n\nadd_executable(\"${PROJECT_NAME}\" \"${PROJECT_NAME}lib\")" cmake_version app))))
 
 #+end_src
 
@@ -1187,15 +1303,36 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
     (when (require 'dap-cpptools nil 'noerror)
       (dap-cpptools-setup)))
 
-  (defun efs/dap-register-debug-template ()
-    (dap-register-debug-template
-     "cpptools::Run Configuration"
-     (list :type "cppdbg"
-           :request "launch"
-           :name "cpptools::Run Configuration"
-           :MIMode "gdb"
-           :program "${workspaceFolder}/bin/*.exe"
-           :cwd "${workspaceFolder}")))
+  ;; (defun efs/dap-register-debug-template ()
+  ;;   (dap-register-debug-template
+  ;;    "cpptools::Run Configuration"
+  ;;    (list :type "cppdbg"
+  ;;          :request "launch"
+  ;;          :name "cpptools::Run Configuration"
+  ;;          :MIMode "lldb"
+  ;;          :program "${workspaceFolder}/bin/*.exe"
+  ;;          :cwd "${workspaceFolder}")))
+
+  (defun init-dap-json ()
+    (interactive)
+    (with-temp-file "launch.json"
+        (insert "{
+      \"version\": \"0.2.0\",
+      \"configurations\": [
+          {
+              \"name\": \"Debug Emacs\",
+              \"type\": \"cppdbg\",
+              \"request\": \"launch\",
+              \"program\": \"${workspaceFolder}/bin/*.exe\",
+              \"args\": [\"-q\"],
+              \"stopAtEntry\": false,
+              \"cwd\": \"${workspaceFolder}\",
+              \"environment\": [],
+              \"externalConsole\": false,
+              \"MIMode\": \"lldb\"
+          }
+      ]
+  }")))
 
   (use-package dap-mode
     :hook
@@ -1203,8 +1340,7 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
     (dap-mode . efs/dap-cpptools)
     (dap-mode . efs/dap-mode-configs)
     :config
-    (add-hook 'dap-stopped-hook (lambda (arg) (call-interactively #'dap-hydra)))
-    (efs/dap-register-debug-template))
+    (add-hook 'dap-stopped-hook (lambda (arg) (call-interactively #'dap-hydra))))
 
 #+end_src
 
