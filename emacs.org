@@ -232,7 +232,7 @@ https://clang.llvm.org/docs/JSONCompilationDatabase.html
   (defun cmake-init-shell-config ()
     (interactive)
     ;; note: string output in .sh later invoke in bash shell so \ behaviour need to be handled twice
-    (shell-command (format "echo cmake -S . -B \"\'out\\build\'\" -G \"%s\" -D CMAKE_BUILD_TYPE=\"%s\" -D CMAKE_C_COMPILER=\"%s\" -D CMAKE_CXX_COMPILER=\"%s\" -D CMAKE_EXPORT_COMPILE_COMMANDS=1 -P \"\'cmake\\git.cmake\'\" > cmake-config.sh" build_system compilation_mode c_compiler c++_compiler)))
+    (shell-command (format "echo cmake -S . -B \"\'out\\build\'\" -G \"%s\" -D CMAKE_BUILD_TYPE=\"%s\" -D CMAKE_C_COMPILER=\"%s\" -D CMAKE_CXX_COMPILER=\"%s\" -D CMAKE_EXPORT_COMPILE_COMMANDS=1 -D CMAKE_CXX_EXTENSIONS=OFF > cmake-config.sh" build_system compilation_mode c_compiler c++_compiler)))
 
 #+end_src
 
@@ -376,7 +376,7 @@ Application listfile.
   (defun cmake-init-app-cmakelist (&optional app)
     (interactive "sApplication name: ")
     (with-temp-file "CMakeLists.txt"
-      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nfile(GLOB_RECURSE \"${PROJECT_NAME}_SRC\" \"${CMAKE_CURRENT_SOURCE_DIR}\" \"*.cc\")\n\nadd_library(\"${PROJECT_NAME}lib\" STATIC \"${PROJECT_NAME}_SRC\")\ntarget_include_directories(\"${PROJECT_NAME}\" PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/includes\")\n\nadd_executable(\"${PROJECT_NAME}\" \"${PROJECT_NAME}lib\")" cmake_version app))))
+      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nfile(GLOB_RECURSE \"${PROJECT_NAME}_SRC\" \"${CMAKE_CURRENT_SOURCE_DIR}\" \"*.cc\")\n\nadd_library(\"${PROJECT_NAME}lib\" OBJECT \"${${PROJECT_NAME}_SRC}\")\ntarget_include_directories(\"${PROJECT_NAME}lib\" PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/includes\")" cmake_version app))))
 
 #+end_src
 
@@ -1323,7 +1323,7 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
               \"name\": \"Debug Emacs\",
               \"type\": \"cppdbg\",
               \"request\": \"launch\",
-              \"program\": \"${workspaceFolder}/bin/*.exe\",
+              \"program\": \"${workspaceFolder}/out/build/bin/*.exe\",
               \"args\": [\"-q\"],
               \"stopAtEntry\": false,
               \"cwd\": \"${workspaceFolder}\",
