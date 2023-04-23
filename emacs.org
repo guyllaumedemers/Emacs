@@ -10,6 +10,141 @@ Here is a emacs config derived from systemcrafters.cc= that customize further yo
 
 In this document I've added links in many places that lead you to documentation for the various packages we use.  If you're looking at this file in Emacs, you can put your cursor on a link and press =C-c C-o= or run =M-x org-open-at-point= to open the link in your web browser.
 
+* System Config (Windows-nt)
+
+Custom config variable that Unix based packages expect to exist.
+
+** Env PATH
+
+The HOME environment variable that has the default value /home/<username>) on Linux sets the user's directory path. This variable, which is equivalent to _%USERPROFILE% _(C:\\Users\<username> ) is expected to be set by many Unix applications ported to Windows and it also makes directory browser in Emacs and shells easier.
+
+#+begin_src emacs-lisp
+
+  (defun set-unix-system-home ()
+    (interactive)
+    (if (eq system-type 'windows-nt)
+        (shell-command "setx HOME %HOME%")))
+
+#+end_src
+
+Executables located in directories listed in PATH environment variable can be invoked without its full path like ls, echo and who in Unix-like OS or ipconfig, arp and whoami in Windows.
+
+C:\Users\arch\bin> echo %PATH%
+C:\ProgramData\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem...
+
+By adding the directory ~/bin or C:\Users\<user>\bin to PATH variable it makes easir to call command line applications from this directory without specifing its full path from Emacs or shell (cmd.exe).
+
+#+begin_src emacs-lisp
+
+  (defun set-unix-system-path ()
+    (interactive)
+    (if (eq system-type 'windows-nt)
+        (shell-command "setx PATH \"%PATH%;%USERPROFILE%\\bin\"")))
+
+#+end_src
+
+Executables for bash. windows emacs shell behave like cmd which cause issue when running shell commands like echo, touch, etc...
+
+#+begin_src emacs-lisp
+
+  (defun set-system-shell (exec)
+    (interactive "sExecutable name: ")
+    (when (eq system-type 'windows-nt)
+      (let ((shell (get_executable_using_regex "Git" "bin")))
+        (shell-command (format "setx SHELL \'%s\'" shell))
+        (setq shell-file-name (format "%s\\%s.exe" shell exec)))))
+
+#+end_src
+
+** Macros
+
+A set of macros to be used in the current configuration.
+
+*** regex
+
+A shorten version of a generic regex entry.
+
+#+begin_src emacs-lisp
+
+  (defun get_regex_wildcard ()
+    (let ((result "[a-zA-Z0-9\\\/\.\:\+\_\-\~]"))
+      result))
+
+#+end_src
+
+*** get_system_path
+
+A macro returning the system env path variables.
+
+#+begin_src emacs-lisp
+
+  (defun get_system_path ()
+    (let ((result (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))) result))
+
+#+end_src
+
+*** get_executable_using_regex
+
+A macro to retrieve path for a specific target.
+
+#+begin_src emacs-lisp
+
+  (defun get_executable_using_regex (folder exec)
+    (let (result)
+      (dolist (directory (get_system_path) result)
+        (if (string-match (format "%s*%s%s*%s" (get_regex_wildcard) folder (get_regex_wildcard) exec) directory)
+            (setq result directory)))))
+
+#+end_src
+
+** Compilation Keybindings
+
+Handy key bindings for invoking compilation command.
+
+#+begin_src emacs-lisp
+
+  (progn
+    (global-set-key (kbd "<f9>") #'compile)
+    (global-set-key (kbd "<C-f9>")
+                    (lambda () (interactive)
+                      (save-buffer)
+                      (recompile))))
+
+#+end_src
+
+** Custom.el
+
+set package customization to a different file to prevent poluting the init.el
+
+#+begin_src emacs-lisp
+
+  (progn
+    (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+    (when (file-exists-p custom-file)
+      (load custom-file)))
+
+#+end_src
+
+** Backup files
+
+set temporary files to a different directory
+
+#+begin_src emacs-lisp
+
+  (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
+
+#+end_src
+
+** Recycle Bin
+
+The following line configures Emacs so that files deleted via Emacs are moved to the Recycle.
+
+#+begin_src emacs-lisp
+
+  (setq delete-by-moving-to-trash t) 
+
+#+end_src
+
 * Distribution Service
 
 Set basic requirements for your operating system.
@@ -232,7 +367,7 @@ https://clang.llvm.org/docs/JSONCompilationDatabase.html
   (defun cmake-init-shell-config ()
     (interactive)
     ;; note: string output in .sh later invoke in bash shell so \ behaviour need to be handled twice
-    (shell-command (format "echo cmake -S . -B \"\'out\\build\'\" -G \"%s\" -D CMAKE_BUILD_TYPE=\"%s\" -D CMAKE_C_COMPILER=\"%s\" -D CMAKE_CXX_COMPILER=\"%s\" -D CMAKE_EXPORT_COMPILE_COMMANDS=1 -D CMAKE_CXX_EXTENSIONS=OFF > cmake-config.sh" build_system compilation_mode c_compiler c++_compiler)))
+    (shell-command (format "echo cmake -S . -B \"\'out\\build\'\" -G \"%s\" -D CMAKE_BUILD_TYPE=\"%s\" -D CMAKE_C_COMPILER=\"%s\" -D CMAKE_CXX_COMPILER=\"%s\" -D CMAKE_EXPORT_COMPILE_COMMANDS=\'1\' -D CMAKE_CXX_EXTENSIONS=\'OFF\' > cmake-config.sh" build_system compilation_mode c_compiler c++_compiler)))
 
 #+end_src
 
@@ -562,142 +697,6 @@ Python is a high-level, general-purpose programming language. Python is dynamica
   (defun install-python ()
     (interactive)
     (shell-command "choco install python -y"))
-
-#+end_src
-
-* System Config (Windows-nt)
-
-Custom config variable that Unix based packages expect to exist.
-
-** Env PATH
-
-The HOME environment variable that has the default value /home/<username>) on Linux sets the user's directory path. This variable, which is equivalent to _%USERPROFILE% _(C:\\Users\<username> ) is expected to be set by many Unix applications ported to Windows and it also makes directory browser in Emacs and shells easier.
-
-#+begin_src emacs-lisp
-
-  ;; M-x set-unix-system-home
-  (defun set-unix-system-home ()
-    (interactive)
-    (if (eq system-type 'windows-nt)
-        (shell-command "setx HOME %HOME%")))
-
-#+end_src
-
-Executables located in directories listed in PATH environment variable can be invoked without its full path like ls, echo and who in Unix-like OS or ipconfig, arp and whoami in Windows.
-
-C:\Users\arch\bin> echo %PATH%
-C:\ProgramData\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem...
-
-By adding the directory ~/bin or C:\Users\<user>\bin to PATH variable it makes easir to call command line applications from this directory without specifing its full path from Emacs or shell (cmd.exe).
-
-#+begin_src emacs-lisp
-
-  ;; M-x set-unix-system-path
-  (defun set-unix-system-path ()
-    (interactive)
-    (if (eq system-type 'windows-nt)
-        (shell-command "setx PATH \"%PATH%;%USERPROFILE%\\bin\"")))
-
-#+end_src
-
-Executables for bash.
-
-#+begin_src emacs-lisp
-
-  ;; set %SHELL%
-  (defun set-system-shell (&optional shell)
-    (when (eq system-type 'windows-nt)
-      (shell-command (format "setx SHELL %s" shell))
-      (setq shell-file-name shell)))
-
-  ;; M-x find-and-set-shell-bash
-  (defun find-and-set-shell-bash ()
-    (interactive)
-    (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
-    (dolist (dir system_path)
-      (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*Git" dir)
-        (setq subdir (directory-files dir))
-        (dolist (file subdir)
-          (when (string-match "bash.exe" file)
-            (setq exec file)
-            (set-system-shell (format "%s\\%s" dir exec))
-            (return))))))
-
-#+end_src
-
-** Console/Shell
-
-Various command to run in emacs.
-
-#+begin_src emacs-lisp
-
-  ;; M-x run-bash
-  (defun run-bash ()
-    (interactive)
-    (let ((shell-file-name "C:\\Program Files\\Git\\bin\\bash.exe"))
-      (shell "*bash*")))
-
-  ;; M-x run-cmdexe
-  (defun run-cmdexe ()
-    (interactive)
-    (let ((shell-file-name "cmd.exe"))
-      (shell "*cmd.exe*")))
-
-  ;; M-x run-powershell
-  (defun run-powershell ()
-    "Run powershell"
-    (interactive)
-    (async-shell-command "c:/windows/system32/WindowsPowerShell/v1.0/powershell.exe -Command -"
-                         nil
-                         nil))
-
-#+end_src
-
-** Compilation Keybindings
-
-Handy key bindings for invoking compilation command.
-
-#+begin_src emacs-lisp
-
-  (progn
-    (global-set-key (kbd "<f9>") #'compile)
-    (global-set-key (kbd "<C-f9>")
-                    (lambda () (interactive)
-                      (save-buffer)
-                      (recompile))))
-
-#+end_src
-
-** Custom.el
-
-set package customization to a different file to prevent poluting the init.el
-
-#+begin_src emacs-lisp
-
-  (progn
-    (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-    (when (file-exists-p custom-file)
-      (load custom-file)))
-
-#+end_src
-
-** Backup files
-
-set temporary files to a different directory
-
-#+begin_src emacs-lisp
-
-  (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
-
-#+end_src
-
-** Recycle Bin
-
-The following line configures Emacs so that files deleted via Emacs are moved to the Recycle.
-
-#+begin_src emacs-lisp
-
-  (setq delete-by-moving-to-trash t) 
 
 #+end_src
 
@@ -1303,36 +1302,33 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
     (when (require 'dap-cpptools nil 'noerror)
       (dap-cpptools-setup)))
 
-  ;; (defun efs/dap-register-debug-template ()
-  ;;   (dap-register-debug-template
-  ;;    "cpptools::Run Configuration"
-  ;;    (list :type "cppdbg"
-  ;;          :request "launch"
-  ;;          :name "cpptools::Run Configuration"
-  ;;          :MIMode "lldb"
-  ;;          :program "${workspaceFolder}/bin/*.exe"
-  ;;          :cwd "${workspaceFolder}")))
+  (defun find_debugger_path (&optional debugger)
+    (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
+    (dolist (elem system_path)
+      (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*LLVM\\bin" elem)
+        return elem)))
 
-  (defun init-dap-json ()
-    (interactive)
+  (defun init-dap-json (&optional app &optional debugger)
+    (interactive "sApplication name: \nsDebugger name: ")
     (with-temp-file "launch.json"
-        (insert "{
+        (insert (format "{
       \"version\": \"0.2.0\",
       \"configurations\": [
           {
               \"name\": \"Debug Emacs\",
               \"type\": \"cppdbg\",
               \"request\": \"launch\",
-              \"program\": \"${workspaceFolder}/out/build/bin/\",
+              \"program\": \"${workspaceFolder}/out/build/bin/%s\",
               \"args\": [\"-q\"],
               \"stopAtEntry\": false,
               \"cwd\": \"${workspaceFolder}\",
               \"environment\": [],
               \"externalConsole\": false,
-              \"MIMode\": \"lldb\"
+              \"MIMode\": \"%s\",
+              \"MIDebuggerPath\": \"%s\"
           }
       ]
-  }")))
+  }" app debugger (find_debugger_path debugger)))))
 
   (use-package dap-mode
     :hook
