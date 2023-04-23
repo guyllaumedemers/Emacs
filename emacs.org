@@ -376,7 +376,7 @@ Application listfile.
   (defun cmake-init-app-cmakelist (&optional app)
     (interactive "sApplication name: ")
     (with-temp-file "CMakeLists.txt"
-      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nfile(GLOB_RECURSE \"${PROJECT_NAME}_SRC\" \"${CMAKE_CURRENT_SOURCE_DIR}\" \"*.cc\")\n\nadd_library(\"${PROJECT_NAME}lib\" OBJECT \"${${PROJECT_NAME}_SRC}\")\ntarget_include_directories(\"${PROJECT_NAME}lib\" PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/includes\")" cmake_version app))))
+      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nfile(GLOB_RECURSE \"${PROJECT_NAME}_SRC\" \"${CMAKE_CURRENT_SOURCE_DIR}\" \"*.cc\")\n\nadd_library(\"${PROJECT_NAME}lib\" OBJECT \"${${PROJECT_NAME}_SRC}\")\ntarget_include_directories(\"${PROJECT_NAME}lib\" PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/includes\")\n\n##temp executable\nget_target_property(OUT \"${PROJECT_NAME}lib\" SOURCES)\nadd_executable(\"${PROJECT_NAME}\" ${OUT})" cmake_version app))))
 
 #+end_src
 
@@ -1323,7 +1323,7 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
               \"name\": \"Debug Emacs\",
               \"type\": \"cppdbg\",
               \"request\": \"launch\",
-              \"program\": \"${workspaceFolder}/out/build/bin/*.exe\",
+              \"program\": \"${workspaceFolder}/out/build/bin/\",
               \"args\": [\"-q\"],
               \"stopAtEntry\": false,
               \"cwd\": \"${workspaceFolder}\",
