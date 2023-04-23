@@ -10,59 +10,13 @@ Here is a emacs config derived from systemcrafters.cc= that customize further yo
 
 In this document I've added links in many places that lead you to documentation for the various packages we use.  If you're looking at this file in Emacs, you can put your cursor on a link and press =C-c C-o= or run =M-x org-open-at-point= to open the link in your web browser.
 
-* System Config (Windows-nt)
-
-Custom config variable that Unix based packages expect to exist.
-
-** Env PATH
-
-The HOME environment variable that has the default value /home/<username>) on Linux sets the user's directory path. This variable, which is equivalent to _%USERPROFILE% _(C:\\Users\<username> ) is expected to be set by many Unix applications ported to Windows and it also makes directory browser in Emacs and shells easier.
-
-#+begin_src emacs-lisp
-
-  (defun set-unix-system-home ()
-    (interactive)
-    (if (eq system-type 'windows-nt)
-        (shell-command "setx HOME %HOME%")))
-
-#+end_src
-
-Executables located in directories listed in PATH environment variable can be invoked without its full path like ls, echo and who in Unix-like OS or ipconfig, arp and whoami in Windows.
-
-C:\Users\arch\bin> echo %PATH%
-C:\ProgramData\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem...
-
-By adding the directory ~/bin or C:\Users\<user>\bin to PATH variable it makes easir to call command line applications from this directory without specifing its full path from Emacs or shell (cmd.exe).
-
-#+begin_src emacs-lisp
-
-  (defun set-unix-system-path ()
-    (interactive)
-    (if (eq system-type 'windows-nt)
-        (shell-command "setx PATH \"%PATH%;%USERPROFILE%\\bin\"")))
-
-#+end_src
-
-Executables for bash. windows emacs shell behave like cmd which cause issue when running shell commands like echo, touch, etc...
-
-#+begin_src emacs-lisp
-
-  (defun set-system-shell (exec)
-    (interactive "sExecutable name: ")
-    (when (eq system-type 'windows-nt)
-      (let ((shell (get_executable_using_regex "Git" "bin")))
-        (shell-command (format "setx SHELL \'%s\'" shell))
-        (setq shell-file-name (format "%s\\%s.exe" shell exec)))))
-
-#+end_src
-
 ** Macros
 
 A set of macros to be used in the current configuration.
 
 *** regex
 
-A shorten version of a generic regex entry.
+A macro returning a short version of a generic regex prefix.
 
 #+begin_src emacs-lisp
 
@@ -89,61 +43,69 @@ A macro to retrieve path for a specific target.
 
 #+begin_src emacs-lisp
 
-  (defun get_executable_using_regex (folder exec)
+  (defun get_executable_using_regex (target exec)
     (let (result)
       (dolist (directory (get_system_path) result)
-        (if (string-match (format "%s*%s%s*%s" (get_regex_wildcard) folder (get_regex_wildcard) exec) directory)
+        (if (string-match (format "%s*%s%s*%s" (get_regex_wildcard) target (get_regex_wildcard) exec) directory)
             (setq result directory)))))
 
 #+end_src
 
-** Compilation Keybindings
+* System Config (Windows-nt)
 
-Handy key bindings for invoking compilation command.
+Custom config variable that Unix based packages expect to exist.
 
-#+begin_src emacs-lisp
+** Env variables
 
-  (progn
-    (global-set-key (kbd "<f9>") #'compile)
-    (global-set-key (kbd "<C-f9>")
-                    (lambda () (interactive)
-                      (save-buffer)
-                      (recompile))))
+Custom setup for various system variables.
 
-#+end_src
+*** Home
 
-** Custom.el
-
-set package customization to a different file to prevent poluting the init.el
+The HOME environment variable that has the default value /home/<username>) on Linux sets the user's directory path. This variable, which is equivalent to _%USERPROFILE% _(C:\\Users\<username> ) is expected to be set by many Unix applications ported to Windows and it also makes directory browser in Emacs and shells easier.
 
 #+begin_src emacs-lisp
 
-  (progn
-    (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-    (when (file-exists-p custom-file)
-      (load custom-file)))
+  (defun set-unix-system-home ()
+    (interactive)
+    (if (eq system-type 'windows-nt)
+        (shell-command "setx HOME %HOME%")))
 
 #+end_src
 
-** Backup files
+*** Path
 
-set temporary files to a different directory
+Executables located in directories listed in PATH environment variable can be invoked without its full path like ls, echo and who in Unix-like OS or ipconfig, arp and whoami in Windows.
+
+C:\Users\arch\bin> echo %PATH%
+C:\ProgramData\Oracle\Java\javapath;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem...
+
+By adding the directory ~/bin or C:\Users\<user>\bin to PATH variable it makes easir to call command line applications from this directory without specifing its full path from Emacs or shell (cmd.exe).
 
 #+begin_src emacs-lisp
 
-  (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
+  (defun set-unix-system-path ()
+    (interactive)
+    (if (eq system-type 'windows-nt)
+        (shell-command "setx PATH \"%PATH%;%USERPROFILE%\\bin\"")))
 
 #+end_src
 
-** Recycle Bin
+*** Shell
 
-The following line configures Emacs so that files deleted via Emacs are moved to the Recycle.
+Executables for bash. windows emacs shell behave like cmd which cause issue when running shell commands like echo, touch, etc...
 
 #+begin_src emacs-lisp
 
-  (setq delete-by-moving-to-trash t) 
+  (defun set-unix-system-shell (exec)
+    (interactive "sExecutable name: ")
+    (when (eq system-type 'windows-nt)
+      (let ((shell (get_executable_using_regex "Git" "bin")))
+        (setq shell-file-name (format "%s\\%s.exe" shell exec))
+        (shell-command (format "setx SHELL \'%s\\%s.exe\'" shell exec)))))
 
 #+end_src
+
+
 
 * Distribution Service
 
@@ -155,7 +117,6 @@ Chocolatey is a machine-level, command-line package manager and installer for so
 
 #+begin_src emacs-lisp
 
-  ;; M-x install-chocolatey
   (defun install-chocolatey ()
     (interactive)
     (if (eq system-type 'windows-nt)
@@ -173,126 +134,9 @@ Git is a distributed version control system that tracks changes in any set of co
 
 #+begin_src emacs-lisp
 
-  ;; M-x install-git
   (defun install-git ()
     (interactive)
     (shell-command "choco install git --params \"'/GitAndUnixToolsOnPath'\" --use-remembered-arguments -y"))
-
-#+end_src
-
-**** Gitignore
-
-#+begin_src emacs-lisp
-
-  (defun init-gitignore ()
-      (interactive)
-      (with-temp-file "\.gitignore"
-        (insert "# Created by https://www.toptal.com/developers/gitignore/api/cmake,c++,c
-  # Edit at https://www.toptal.com/developers/gitignore?templates=cmake,c++,c
-
-  ### C ###
-  # Prerequisites
-  ,*.d
-
-  # Object files
-  ,*.o
-  ,*.ko
-  ,*.obj
-  ,*.elf
-
-  # Linker output
-  ,*.ilk
-  ,*.map
-  ,*.exp
-
-  # Precompiled Headers
-  ,*.gch
-  ,*.pch
-
-  # Libraries
-  ,*.lib
-  ,*.a
-  ,*.la
-  ,*.lo
-
-  # Shared objects (inc. Windows DLLs)
-  ,*.dll
-  ,*.so
-  ,*.so.*
-  ,*.dylib
-
-  # Executables
-  ,*.exe
-  ,*.out
-  ,*.app
-  ,*.i*86
-  ,*.x86_64
-  ,*.hex
-
-  # Debug files
-  ,*.dSYM/
-  ,*.su
-  ,*.idb
-  ,*.pdb
-
-  # Kernel Module Compile Results
-  ,*.mod*
-  ,*.cmd
-  .tmp_versions/
-  modules.order
-  Module.symvers
-  Mkfile.old
-  dkms.conf
-
-  ### C++ ###
-  # Prerequisites
-
-  # Compiled Object files
-  ,*.slo
-
-  # Precompiled Headers
-
-  # Compiled Dynamic libraries
-
-  # Fortran module files
-  ,*.mod
-  ,*.smod
-
-  # Compiled Static libraries
-  ,*.lai
-
-  # Executables
-
-  ### CMake ###
-  CMakeLists.txt.user
-  CMakeCache.txt
-  CMakeFiles
-  CMakeScripts
-  Testing
-  Makefile
-  cmake_install.cmake
-  install_manifest.txt
-  compile_commands.json
-  CTestTestfile.cmake
-  _deps
-
-  ### CMake Patch ###
-  # External projects
-  ,*-prefix/
-
-  # End of https://www.toptal.com/developers/gitignore/api/cmake,c++,c
-
-  ### wildcard removing trash files created by vim, notepad++
-  ,*.bak
-  ,*.un~
-  ,*.txt~
-  ,*~
-
-  ### remove build dir
-  out/*
-
-  ### remove visual studio chached dir
-  .vs")))
 
 #+end_src
 
@@ -302,7 +146,6 @@ gh cli allow creation of repo on the upstream using the command line. [gh repo c
 
 #+begin_src emacs-lisp
 
-  ;; M-x install-gh
   (defun install-gh ()
     (interactive)
     (shell-command "choco install gh -y"))
@@ -332,253 +175,6 @@ CMake is cross-platform free and open-source software for build automation, test
   (defun install-cmake ()
     (interactive)
     (shell-command "choco install cmake --installargs '\"ADD_CMAKE_TO_PATH=User\"' --use-remembered-arguments -y"))
-
-#+end_src
-
-**** Build Process
-
-CMake build system generator key steps to create build system required files.
-
-***** Configuration
-
-This stage is about reading project details stored in a directory, called the source tree, and preparing an output directory or build tree for the generation stage.
-
-#+begin_src emacs-lisp
-
-  ;; M-x run-cmake-config to execute the .cmd file created below
-  (defun run-cmake-config ()
-    (interactive)
-    (shell-command "./cmake-config.sh"))
-
-#+end_src
-
-****** Template
-
-https://clang.llvm.org/docs/JSONCompilationDatabase.html
-
-#+begin_src emacs-lisp
-
-  (setq build_system "\'Unix Makefiles\'")
-  (setq compilation_mode "\'DEBUG\'")
-  (setq c_compiler "\'clang\'")
-  (setq c++_compiler "\'clang++\'")
-
-  ;; M-x cmake-init-shell-config at project source tree level to generate .cmd file
-  (defun cmake-init-shell-config ()
-    (interactive)
-    ;; note: string output in .sh later invoke in bash shell so \ behaviour need to be handled twice
-    (shell-command (format "echo cmake -S . -B \"\'out\\build\'\" -G \"%s\" -D CMAKE_BUILD_TYPE=\"%s\" -D CMAKE_C_COMPILER=\"%s\" -D CMAKE_CXX_COMPILER=\"%s\" -D CMAKE_EXPORT_COMPILE_COMMANDS=\'1\' -D CMAKE_CXX_EXTENSIONS=\'OFF\' > cmake-config.sh" build_system compilation_mode c_compiler c++_compiler)))
-
-#+end_src
-
-***** Generation
-
-After reading the project configuration, CMake will generate a *buildsystem* for the exact environment it is working in.
-
-#+begin_src emacs-lisp
-
-  ;; follows the configuration step without user interaction and generate Makefiles or project files
-
-#+end_src
-
-***** Building
-
-Build tools will execute steps to produce *targets* with compilers, linkers, static and dynamic analysis tools, test frameworks, reporting tools, and anything else you can think of.
-
-#+begin_src emacs-lisp
-
-  ;; M-x run-cmake-build to execute the .cmd file created below
-  (defun run-cmake-build ()
-    (interactive)
-    (shell-command "./cmake-build.sh"))
-
-#+end_src
-
-****** Template
-
-#+begin_src emacs-lisp
-
-  ;; M-x cmake-init-shell-build at project source tree level to generate .cmd file
-  (defun cmake-init-shell-build ()
-    (interactive)
-    ;; note: string output in .sh later invoke in bash shell so \ behaviour need to be handled twice
-    (shell-command "echo cmake --build \"\'out\\build\'\" > cmake-build.sh"))
-
-#+end_src
-
-**** Project Templates
-
-A few template files to properly start with CMake.
-
-***** Directory
-
-Setup the current directory as follow:
-
-#+begin_src ditaa
-
-  root     
-  |
-  +--cmake
-  |  +---*.cmake
-  +--doc
-  +--extern
-  +--out
-  |  +---build
-  |  |   +----DEBUG
-  |  |   +----RELEASE
-  +--res
-  +--src
-  |  +---App1
-  |  |   +---includes
-  |  |   +---src
-  |  |   +---test
-  |  |   +---CMakeLists.txt   
-  |  +---Main.cpp
-  |  +---CMakeLists.txt
-  +--test
-  +--.git
-  +--.gitsubmodules
-  +--CMakeLists.txt
-  +--README.md
-  +--cmake-config.sh
-  +--cmake-build.sh
-
-#+end_src
-
-Run the following command at directory to create the above tree-like directories.
-
-#+begin_src emacs-lisp
-
-  ;; M-x init-project-root-dir - create the root directory tree
-  (defun init-project-root-dir (&optional project)
-    (interactive "sProject name: ")
-    (shell-command (format "mkdir -p %s && cd %s && mkdir -p {cmake,doc,extern,out,res,src,test}" project project))
-    (setq dir_folders (split-string (shell-command-to-string (format "cd %s && ls -d */" project)) "\n"))
-    (dolist (elem dir_folders)
-      (setq match (car (member elem (list "doc/" "extern/" "test/"))))
-      (if match (shell-command (format "cd %s && touch > %s\\CMakeLists.txt" project match)))
-      (shell-command (format "cd %s && touch > %s\\.keep" project elem))))
-
-#+end_src
-
-Run the following command at directory to create the Application tree-like directories.
-
-#+begin_src emacs-lisp
-
-  ;; M-x init-project-src-application-dir - create the application directory tree
-  (defun init-project-src-application-dir (&optional app)
-    (interactive "sApplication name: ")
-    (shell-command (format "mkdir -p %s && cd %s && mkdir -p {includes,lib3,test}" app app))
-    (setq dir_folders (split-string (shell-command-to-string (format "cd %s && ls -d */" app)) "\n"))
-    (dolist (elem dir_folders)
-      (shell-command (format "cd %s && touch > %s\\.keep" app elem))))
-
-#+end_src
-
-***** CMakeLists.txt
-
-Root listfile.
-
-#+begin_src emacs-lisp
-
-  (setq cmake_version (car (last (split-string (car (split-string (shell-command-to-string "cmake --version") "\n")) " "))))
-
-  ;; Internal use ONLY - create top-level CMakeLists.txt
-  (defun cmake-init-root-cmakelist (&optional project)
-    (interactive "sProject name: ")
-    (with-temp-file "CMakeLists.txt"
-      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nadd_subdirectory(\"doc\")\nadd_subdirectory(\"extern\")\nadd_subdirectory(\"src\" \"bin\")\nadd_subdirectory(\"test\")" cmake_version project))))
-
-#+end_src
-
-Src listfile.
-
-#+begin_src emacs-lisp
-
-  ;; Internal use ONLY - create src-level CMakeLists.txt
-  (defun cmake-init-src-cmakelist (&optional app)
-    (interactive "sSubdirectory name: ")
-    (with-temp-file "CMakeLists.txt"
-      (insert (format "add_subdirectory(\"%s\")" app))))
-
-#+end_src
-
-Application listfile.
-
-#+begin_src emacs-lisp
-
-  ;; Internal use ONLY - create app-level CMakeLists.txt
-  (defun cmake-init-app-cmakelist (&optional app)
-    (interactive "sApplication name: ")
-    (with-temp-file "CMakeLists.txt"
-      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nfile(GLOB_RECURSE \"${PROJECT_NAME}_SRC\" \"${CMAKE_CURRENT_SOURCE_DIR}\" \"*.cc\")\n\nadd_library(\"${PROJECT_NAME}lib\" OBJECT \"${${PROJECT_NAME}_SRC}\")\ntarget_include_directories(\"${PROJECT_NAME}lib\" PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/includes\")\n\n##temp executable\nget_target_property(OUT \"${PROJECT_NAME}lib\" SOURCES)\nadd_executable(\"${PROJECT_NAME}\" ${OUT})" cmake_version app))))
-
-#+end_src
-
-***** Main.cc
-
-Hello World.cc
-
-#+begin_src emacs-lisp
-
-  (defun init-main-cc ()
-    (interactive)
-    (with-temp-file "Main.cc"
-      (insert "#pragma once\n\n#include <cstdio>\n\nint main(int argc, char* argv[])\n{\n\tstd::printf(\"HelloWorld!\");\n}")))
-
-#+end_src
-
-***** Modules
-
-A set of modules to be used in cmake projects.
-
-****** GitSubmodules
-
-A git module that synch-update your project submodules.
-
-#+begin_src emacs-lisp
-
-  (defun cmake-init-git-module ()
-    (interactive)
-    (with-temp-file "git.cmake"
-      (insert "find_package(Git QUIET)
-  if(GIT_FOUND AND EXISTS \"${CMAKE_SOURCE_DIR}/.git\")
-    # Update submodules as needed
-    option(GIT_SUBMODULE \"Check submodules during build\" ON)
-    if(GIT_SUBMODULE)
-      message(STATUS \"Submodule update\")
-      execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        RESULT_VARIABLE GIT_SUBMOD_RESULT)
-      if(NOT GIT_SUBMOD_RESULT EQUAL \"0\")
-        message(FATAL_ERROR \"git submodule update --init --recursive failed with ${GIT_SUBMOD_RESULT}, please checkout submodules\")
-      endif()
-    endif()
-  endif()")))
-
-#+end_src
-
-***** Master Command
-
-A master command to easilly initialize your project with the correct startup files using the commands defined above.
-
-#+begin_src emacs-lisp
-
-  ;; spend time figuring out how to invoke emacs command from the shell terminal
-  ;; without opening a new emacs frame
-
-#+end_src
-
-**** Debugging and Tracing
-
-CMake can be run with a multitude of options that allow you to peek under the hood. To get general information about variables, commands, macro, and other settings.
-
-#+begin_src emacs-lisp
-
-  ;; M-x run-cmake-debug-trace
-  (defun run-cmake-debug-trace (&optional file)
-    (interactive "sOutput file name: ")
-    (shell-command (format "cmake --system-information %s" file)))
 
 #+end_src
 
@@ -700,31 +296,372 @@ Python is a high-level, general-purpose programming language. Python is dynamica
 
 #+end_src
 
-* Package System Setup
+** Templates
 
-Emacs has a built in package manager but it doesn't make it easy to automatically install packages on a new system the first time you pull down your configuration.  [[https://github.com/jwiegley/use-package][use-package]] is a really helpful package used in this configuration to make it a lot easier to automate the installation and configuration of everything else we use.
+A set of templates used when creating a new workspace directory.
+
+*** Gitignore
 
 #+begin_src emacs-lisp
 
-  (progn
-    ;; init package sources
-    (when (require 'package nil 'noerror)
-      (setq package-archives '(
-                               ("melpa" . "https://melpa.org/packages/")
-                               ("org" . "https://orgmode.org/elpa/")
-                               ("elpa" . "https://elpa.gnu.org/packages/")))
-      (package-initialize)
-      ;; refresh archive description list
-      (unless package-archive-contents (package-refresh-contents))
-      ;; install/update use-package
-      (unless (package-installed-p 'use-package) (package-install 'use-package))
-      ;; use-package ensure config
-      (when (require 'use-package nil 'noerror)
-        (setq use-package-always-ensure t))))
+  (defun init-gitignore ()
+      (interactive)
+      (with-temp-file "\.gitignore"
+        (insert "# Created by https://www.toptal.com/developers/gitignore/api/cmake,c++,c
+  # Edit at https://www.toptal.com/developers/gitignore?templates=cmake,c++,c
+
+  ### C ###
+  # Prerequisites
+  ,*.d
+
+  # Object files
+  ,*.o
+  ,*.ko
+  ,*.obj
+  ,*.elf
+
+  # Linker output
+  ,*.ilk
+  ,*.map
+  ,*.exp
+
+  # Precompiled Headers
+  ,*.gch
+  ,*.pch
+
+  # Libraries
+  ,*.lib
+  ,*.a
+  ,*.la
+  ,*.lo
+
+  # Shared objects (inc. Windows DLLs)
+  ,*.dll
+  ,*.so
+  ,*.so.*
+  ,*.dylib
+
+  # Executables
+  ,*.exe
+  ,*.out
+  ,*.app
+  ,*.i*86
+  ,*.x86_64
+  ,*.hex
+
+  # Debug files
+  ,*.dSYM/
+  ,*.su
+  ,*.idb
+  ,*.pdb
+
+  # Kernel Module Compile Results
+  ,*.mod*
+  ,*.cmd
+  .tmp_versions/
+  modules.order
+  Module.symvers
+  Mkfile.old
+  dkms.conf
+
+  ### C++ ###
+  # Prerequisites
+
+  # Compiled Object files
+  ,*.slo
+
+  # Precompiled Headers
+
+  # Compiled Dynamic libraries
+
+  # Fortran module files
+  ,*.mod
+  ,*.smod
+
+  # Compiled Static libraries
+  ,*.lai
+
+  # Executables
+
+  ### CMake ###
+  CMakeLists.txt.user
+  CMakeCache.txt
+  CMakeFiles
+  CMakeScripts
+  Testing
+  Makefile
+  cmake_install.cmake
+  install_manifest.txt
+  compile_commands.json
+  CTestTestfile.cmake
+  _deps
+
+  ### CMake Patch ###
+  # External projects
+  ,*-prefix/
+
+  # End of https://www.toptal.com/developers/gitignore/api/cmake,c++,c
+
+  ### wildcard removing trash files created by vim, notepad++
+  ,*.bak
+  ,*.un~
+  ,*.txt~
+  ,*~
+
+  ### remove build dir
+  out/*
+
+  ### remove visual studio chached dir
+  .vs")))
 
 #+end_src
 
-* Basic UI Configuration
+*** CMake Toolchain
+
+CMake build system generator key steps to create build system required files.
+
+***** Configuration
+
+This stage is about reading project details stored in a directory, called the source tree, and preparing an output directory or build tree for the generation stage.
+
+****** Running CMake Config Script
+
+#+begin_src emacs-lisp
+
+  (defun run-cmake-config ()
+    (interactive)
+    (shell-command "./cmake-config.sh"))
+
+#+end_src
+
+****** Building CMake Config Script
+
+https://clang.llvm.org/docs/JSONCompilationDatabase.html
+
+#+begin_src emacs-lisp
+
+  (setq build_system "\'Unix Makefiles\'")
+  (setq compilation_mode "\'DEBUG\'")
+  (setq c_compiler "\'clang\'")
+  (setq c++_compiler "\'clang++\'")
+
+  (defun cmake-init-shell-config ()
+    (interactive)
+    ;; note: string output in .sh later invoke in bash shell so \ behaviour need to be handled twice
+    (shell-command (format "echo cmake -S . -B \"\'out\\build\'\" -G \"%s\" -D CMAKE_BUILD_TYPE=\"%s\" -D CMAKE_C_COMPILER=\"%s\" -D CMAKE_CXX_COMPILER=\"%s\" -D CMAKE_EXPORT_COMPILE_COMMANDS=\'1\' -D CMAKE_CXX_EXTENSIONS=\'OFF\' > cmake-config.sh" build_system compilation_mode c_compiler c++_compiler)))
+
+#+end_src
+
+***** Generation
+
+After reading the project configuration, CMake will generate a *buildsystem* for the exact environment it is working in.
+
+#+begin_src emacs-lisp
+
+  ;; follows the configuration step without user interaction and generate Makefiles or project files
+
+#+end_src
+
+***** Building
+
+Build tools will execute steps to produce *targets* with compilers, linkers, static and dynamic analysis tools, test frameworks, reporting tools, and anything else you can think of.
+
+****** Running CMake Build Script
+
+#+begin_src emacs-lisp
+
+  (defun run-cmake-build ()
+    (interactive)
+    (shell-command "./cmake-build.sh"))
+
+#+end_src
+
+****** Building CMake Build Script
+
+#+begin_src emacs-lisp
+
+  (defun cmake-init-shell-build ()
+    (interactive)
+    ;; note: string output in .sh later invoke in bash shell so \ behaviour need to be handled twice
+    (shell-command "echo cmake --build \"\'out\\build\'\" > cmake-build.sh"))
+
+#+end_src
+
+*** CMake Project
+
+A few template files to properly start with CMake.
+
+***** Directory
+
+Setup the current directory as follow:
+
+#+begin_src ditaa
+
+  root     
+  |
+  +--cmake
+  |  +---*.cmake
+  +--doc
+  +--extern
+  +--out
+  |  +---build
+  |  |   +----DEBUG
+  |  |   +----RELEASE
+  +--res
+  +--src
+  |  +---App1
+  |  |   +---includes
+  |  |   +---src
+  |  |   +---test
+  |  |   +---CMakeLists.txt   
+  |  +---Main.cpp
+  |  +---CMakeLists.txt
+  +--test
+  +--.git
+  +--.gitsubmodules
+  +--CMakeLists.txt
+  +--README.md
+  +--cmake-config.sh
+  +--cmake-build.sh
+
+#+end_src
+
+Run the following command at directory to create the above tree-like directories.
+
+#+begin_src emacs-lisp
+
+  (defun init-project-root-dir (&optional project)
+    (interactive "sProject name: ")
+    (shell-command (format "mkdir -p %s && cd %s && mkdir -p {cmake,doc,extern,out,res,src,test}" project project))
+    (setq dir_folders (split-string (shell-command-to-string (format "cd %s && ls -d */" project)) "\n"))
+    (dolist (elem dir_folders)
+      (setq match (car (member elem (list "doc/" "extern/" "test/"))))
+      (if match (shell-command (format "cd %s && touch > %s\\CMakeLists.txt" project match)))
+      (shell-command (format "cd %s && touch > %s\\.keep" project elem))))
+
+#+end_src
+
+Run the following command at directory to create the Application tree-like directories.
+
+#+begin_src emacs-lisp
+
+  (defun init-project-src-application-dir (&optional app)
+    (interactive "sApplication name: ")
+    (shell-command (format "mkdir -p %s && cd %s && mkdir -p {includes,lib3,test}" app app))
+    (setq dir_folders (split-string (shell-command-to-string (format "cd %s && ls -d */" app)) "\n"))
+    (dolist (elem dir_folders)
+      (shell-command (format "cd %s && touch > %s\\.keep" app elem))))
+
+#+end_src
+
+***** CMakeLists.txt
+
+Root listfile.
+
+#+begin_src emacs-lisp
+
+  (setq cmake_version (car (last (split-string (car (split-string (shell-command-to-string "cmake --version") "\n")) " "))))
+
+  (defun cmake-init-root-cmakelist (&optional project)
+    (interactive "sProject name: ")
+    (with-temp-file "CMakeLists.txt"
+      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nadd_subdirectory(\"doc\")\nadd_subdirectory(\"extern\")\nadd_subdirectory(\"src\" \"bin\")\nadd_subdirectory(\"test\")" cmake_version project))))
+
+#+end_src
+
+Src listfile.
+
+#+begin_src emacs-lisp
+
+  (defun cmake-init-src-cmakelist (&optional app)
+    (interactive "sSubdirectory name: ")
+    (with-temp-file "CMakeLists.txt"
+      (insert (format "add_subdirectory(\"%s\")" app))))
+
+#+end_src
+
+Application listfile.
+
+#+begin_src emacs-lisp
+
+  (defun cmake-init-app-cmakelist (&optional app)
+    (interactive "sApplication name: ")
+    (with-temp-file "CMakeLists.txt"
+      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nfile(GLOB_RECURSE \"${PROJECT_NAME}_SRC\" \"${CMAKE_CURRENT_SOURCE_DIR}\" \"*.cc\")\n\nadd_library(\"${PROJECT_NAME}lib\" OBJECT \"${${PROJECT_NAME}_SRC}\")\ntarget_include_directories(\"${PROJECT_NAME}lib\" PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/includes\")\n\n##temp executable\nget_target_property(OUT \"${PROJECT_NAME}lib\" SOURCES)\nadd_executable(\"${PROJECT_NAME}\" ${OUT})" cmake_version app))))
+
+#+end_src
+
+***** Main.cc
+
+Hello World.cc
+
+#+begin_src emacs-lisp
+
+  (defun init-main-cc ()
+    (interactive)
+    (with-temp-file "Main.cc"
+      (insert "#pragma once\n\n#include <cstdio>\n\nint main(int argc, char* argv[])\n{\n\tstd::printf(\"HelloWorld!\");\n}")))
+
+#+end_src
+
+***** Modules
+
+A set of modules to be used in cmake projects.
+
+****** GitSubmodules
+
+A git module that synch-update your project submodules.
+
+#+begin_src emacs-lisp
+
+  (defun cmake-init-git-module ()
+    (interactive)
+    (with-temp-file "git.cmake"
+      (insert "find_package(Git QUIET)
+  if(GIT_FOUND AND EXISTS \"${CMAKE_SOURCE_DIR}/.git\")
+    # Update submodules as needed
+    option(GIT_SUBMODULE \"Check submodules during build\" ON)
+    if(GIT_SUBMODULE)
+      message(STATUS \"Submodule update\")
+      execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        RESULT_VARIABLE GIT_SUBMOD_RESULT)
+      if(NOT GIT_SUBMOD_RESULT EQUAL \"0\")
+        message(FATAL_ERROR \"git submodule update --init --recursive failed with ${GIT_SUBMOD_RESULT}, please checkout submodules\")
+      endif()
+    endif()
+  endif()")))
+
+#+end_src
+
+***** Master Command
+
+A master command to easilly initialize your project with the correct startup files using the commands defined above.
+
+#+begin_src emacs-lisp
+
+  ;; spend time figuring out how to invoke emacs command from the shell terminal
+  ;; without opening a new emacs frame
+
+#+end_src
+
+*** Debugging and Tracing
+
+CMake can be run with a multitude of options that allow you to peek under the hood. To get general information about variables, commands, macro, and other settings.
+
+#+begin_src emacs-lisp
+
+  (defun run-cmake-debug-trace (&optional file)
+    (interactive "sOutput file name: ")
+    (shell-command (format "cmake --system-information %s" file)))
+
+#+end_src
+
+* Emacs System Config
+
+A set of config specific to emacs that makes your life more pleasing.
+
+** Basic UI Configuration
 
 This section configures basic UI settings that remove unneeded elements to make Emacs look a lot more minimal and modern.  If you're just getting started in Emacs, the menu bar might be helpful so you can remove the =(menu-bar-mode -1)= line if you'd like to still see that.
 
@@ -756,7 +693,66 @@ This section configures basic UI settings that remove unneeded elements to make 
 
 #+end_src
 
+** Backup files
+
+set temporary files to a different directory
+
+#+begin_src emacs-lisp
+
+  (setq backup-directory-alist `((".*" . ,temporary-file-directory)))
+
+#+end_src
+
+** Recycle Bin
+
+The following line configures Emacs so that files deleted via Emacs are moved to the Recycle.
+
+#+begin_src emacs-lisp
+
+  (setq delete-by-moving-to-trash t) 
+
+#+end_src
+
+** Custom.el
+
+set package customization to a different file to prevent poluting the init.el
+
+#+begin_src emacs-lisp
+
+  (progn
+    (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+    (when (file-exists-p custom-file)
+      (load custom-file)))
+
+#+end_src
+
+* Package System Setup
+
+Emacs has a built in package manager but it doesn't make it easy to automatically install packages on a new system the first time you pull down your configuration.  [[https://github.com/jwiegley/use-package][use-package]] is a really helpful package used in this configuration to make it a lot easier to automate the installation and configuration of everything else we use.
+
+#+begin_src emacs-lisp
+
+  (progn
+    ;; init package sources
+    (when (require 'package nil 'noerror)
+      (setq package-archives '(
+                               ("melpa" . "https://melpa.org/packages/")
+                               ("org" . "https://orgmode.org/elpa/")
+                               ("elpa" . "https://elpa.gnu.org/packages/")))
+      (package-initialize)
+      ;; refresh archive description list
+      (unless package-archive-contents (package-refresh-contents))
+      ;; install/update use-package
+      (unless (package-installed-p 'use-package) (package-install 'use-package))
+      ;; use-package ensure config
+      (when (require 'use-package nil 'noerror)
+        (setq use-package-always-ensure t))))
+
+#+end_src
+
 * Keybinding Configuration
+
+** Evil
 
 This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil-mode]] for a Vi-like modal editing experience. [[https://github.com/emacs-evil/evil-collection][evil-collection]] is used to automatically configure various Emacs modes with Vi-like keybindings for evil-mode.
 
@@ -793,6 +789,21 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
   (use-package evil-collection
     :config
     (evil-collection-init))
+
+#+end_src
+
+** Compilation Keybindings
+
+Handy key bindings for invoking compilation command.
+
+#+begin_src emacs-lisp
+
+  (progn
+    (global-set-key (kbd "<f9>") #'compile)
+    (global-set-key (kbd "<C-f9>")
+                    (lambda () (interactive)
+                      (save-buffer)
+                      (recompile))))
 
 #+end_src
 
