@@ -4,7 +4,7 @@
 
 * Welcome!
 
-Here is a emacs config derived from systemcrafters.cc= that customize further your emacs experience in a MS Windows environment. %HOME% & %PATH% environment variables will be configure following the [[https://caiorss.github.io/Emacs-Elisp-Programming/Emacs_On_Windows.html][caiorss.github.io]] tutorial.
+Here is a emacs config derived from systemcrafters.cc= that customize further your emacs experience in a MS Windows environment. *HOME* & *PATH* environment variables will be configure following the [[https://caiorss.github.io/Emacs-Elisp-Programming/Emacs_On_Windows.html][caiorss.github.io]] tutorial.
 
 * Tips for Use
 
