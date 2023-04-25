@@ -37,17 +37,33 @@ A macro returning the system env path variables.
 
 #+end_src
 
-*** get_executable_using_regex
+*** get_directory_using_regex
 
 A macro to retrieve path for a specific target.
 
 #+begin_src emacs-lisp
 
-  (defun get_executable_using_regex (target exec)
+  (defun get_directory_using_regex (target exec)
     (let (result)
       (dolist (directory (get_system_path) result)
         (if (string-match (format "%s*%s%s*%s" (get_regex_wildcard) target (get_regex_wildcard) exec) directory)
-            (setq result directory)))))
+            (setq result directory)))
+      result))
+
+#+end_src
+
+*** get_file_using_regex
+
+A macro to retrive the file at path.
+
+#+begin_src emacs-lisp
+
+  (defun get_file_using_regex (target file)
+    (let (result)
+      (dolist (elem (directory-files target))
+        (if (string-match (format "%s" file) elem)
+            (setq result (format "%s\\%s" target elem))))
+      result))
 
 #+end_src
 
@@ -99,13 +115,11 @@ Executables for bash. windows emacs shell behave like cmd which cause issue when
   (defun set-unix-system-shell (exec)
     (interactive "sExecutable name: ")
     (when (eq system-type 'windows-nt)
-      (let ((shell (get_executable_using_regex "Git" "bin")))
+      (let ((shell (get_directory_using_regex "Git" "bin")))
         (setq shell-file-name (format "%s\\%s.exe" shell exec))
         (shell-command (format "setx SHELL \'%s\\%s.exe\'" shell exec)))))
 
 #+end_src
-
-
 
 * Distribution Service
 
@@ -482,7 +496,6 @@ Build tools will execute steps to produce *targets* with compilers, linkers, sta
 
   (defun cmake-init-shell-build ()
     (interactive)
-    ;; note: string output in .sh later invoke in bash shell so \ behaviour need to be handled twice
     (shell-command "echo cmake --build \"\'out\\build\'\" > cmake-build.sh"))
 
 #+end_src
@@ -1153,24 +1166,13 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
     (lsp-headerline-breadcrumb-mode))
 
-  ;; set target language server protocol
+  ;; clangd setup https://emacs-lsp.github.io/lsp-mode/page/lsp-clangd/ 
   (defun efs/lsp-clients-exe-setup ()
-    (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
-    (dolist (dir system_path)
-      (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*LLVM" dir)
-        (setq subdir (directory-files dir))
-        (dolist (file subdir)
-          (when (string-match "clangd.exe" file)
-            (setq exec file)
-            (setq lsp-clients-clangd-executable (format "%s\\%s" dir exec)))))))
+    (setq lsp-clients-clangd-executable (get_file_using_regex (get_directory_using_regex "LLVM" "bin") "clangd.exe")))
 
-  ;; set target lib used by lsp
   (defun efs/lsp-clients-lib-setup ()
-    (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
-    (dolist (elem system_path)
-      (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*mingw[a-zA-Z0-9\\\/\.\:\_\+\-]*include" elem)
-        (setq temp_var elem)
-        (add-to-list 'lsp-clients-clangd-library-directories temp_var))))
+    (let ((elem (get_directory_using_regex "mingw" "gcc")))
+      (add-to-list 'lsp-clients-clangd-library-directories elem)))
 
   (use-package lsp-mode
     :commands (lsp lsp-deferred)
