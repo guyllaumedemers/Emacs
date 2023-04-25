@@ -14,7 +14,7 @@ In this document I've added links in many places that lead you to documentation 
 
 A set of macros to be used in the current configuration.
 
-*** regex
+*** get_regex_wildcard
 
 A macro returning a short version of a generic regex prefix.
 
