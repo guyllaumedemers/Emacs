@@ -20,8 +20,8 @@ A macro returning a short version of a generic regex prefix.
 
 #+begin_src emacs-lisp
 
-  (defun get_regex_wildcard ()
-    (let ((result "[a-zA-Z0-9\\\/\.\:\+\_\-\~]"))
+  (defun get_regex_wildcard (folder)
+    (let ((result (format ".*%s.*\\(?:\\r\\|\\n\\|\\t\\)?" folder)))
       result))
 
 #+end_src
@@ -37,17 +37,17 @@ A macro returning the system env path variables.
 
 #+end_src
 
-*** get_directory_using_regex
+*** get_directories_using_regex
 
 A macro to retrieve path for a specific target.
 
 #+begin_src emacs-lisp
 
-  (defun get_directory_using_regex (target exec)
+  (defun get_directories_using_regex (target)
     (let (result)
       (dolist (directory (get_system_path) result)
-        (if (string-match (format "%s*%s%s*%s" (get_regex_wildcard) target (get_regex_wildcard) exec) directory)
-            (setq result directory)))
+        (if (string-match (get_regex_wildcard target) directory)
+            (add-to-list 'result directory)))
       result))
 
 #+end_src
@@ -60,9 +60,10 @@ A macro to retrive the file at path.
 
   (defun get_file_using_regex (target file)
     (let (result)
-      (dolist (elem (directory-files target))
-        (if (string-match (format "%s" file) elem)
-            (setq result (format "%s\\%s" target elem))))
+      (dolist (directory (get_directories_using_regex target) result)
+        (dolist (elem (directory-files directory))
+          (if (string-match file elem)
+              (add-to-list 'result (format "%s\\%s" directory elem)))))
       result))
 
 #+end_src
@@ -115,9 +116,9 @@ Executables for bash. windows emacs shell behave like cmd which cause issue when
   (defun set-unix-system-shell (exec)
     (interactive "sExecutable name: ")
     (when (eq system-type 'windows-nt)
-      (let ((shell (get_directory_using_regex "Git" "bin")))
-        (setq shell-file-name (format "%s\\%s.exe" shell exec))
-        (shell-command (format "setx SHELL \'%s\\%s.exe\'" shell exec)))))
+      (let ((shell (car (get_file_using_regex "Git" (format "%s" exec)))))
+        (setq shell-file-name (format "%s" shell))
+        (shell-command (format "setx SHELL \'%s\'" shell)))))
 
 #+end_src
 
@@ -172,7 +173,6 @@ MinGW, formerly mingw32, is a free and open source software development environm
 
 #+begin_src emacs-lisp
 
-  ;; M-x install-mingw
   (defun install-mingw ()
     (interactive)
     (shell-command "choco install mingw -y"))
@@ -185,7 +185,6 @@ CMake is cross-platform free and open-source software for build automation, test
 
 #+begin_src emacs-lisp
 
-  ;; M-x install-cmake
   (defun install-cmake ()
     (interactive)
     (shell-command "choco install cmake --installargs '\"ADD_CMAKE_TO_PATH=User\"' --use-remembered-arguments -y"))
@@ -198,7 +197,6 @@ Make is a build automation tool that automatically builds executable programs an
 
 #+begin_src emacs-lisp
 
-  ;; M-x install-make
   (defun install-make ()
     (interactive)
     (shell-command "choco install make -y"))
@@ -211,7 +209,6 @@ LLVM is a set of compiler and toolchain technologies that can be used to develop
 
 #+begin_src emacs-lisp
 
-  ;; M-x install-llvm
   (defun install-llvm ()
     (interactive)
     (shell-command "choco install llvm -y"))
@@ -303,7 +300,6 @@ Python is a high-level, general-purpose programming language. Python is dynamica
 
 #+begin_src emacs-lisp
 
-  ;; M-x install-python
   (defun install-python ()
     (interactive)
     (shell-command "choco install python -y"))
@@ -1168,10 +1164,10 @@ The =which-key= integration adds helpful descriptions of the various keys so you
 
   ;; clangd setup https://emacs-lsp.github.io/lsp-mode/page/lsp-clangd/ 
   (defun efs/lsp-clients-exe-setup ()
-    (setq lsp-clients-clangd-executable (get_file_using_regex (get_directory_using_regex "LLVM" "bin") "clangd.exe")))
+    (setq lsp-clients-clangd-executable (car (get_file_using_regex "LLVM" "clangd.exe"))))
 
   (defun efs/lsp-clients-lib-setup ()
-    (let ((elem (get_directory_using_regex "mingw" "gcc")))
+    (let ((elem (car (get_directories_using_regex "gcc"))))
       (add-to-list 'lsp-clients-clangd-library-directories elem)))
 
   (use-package lsp-mode
@@ -1224,13 +1220,7 @@ This package is built on the [[https://github.com/Alexander-Miller/treemacs][tre
 #+begin_src emacs-lisp
 
   (defun efs/treemacs-config ()
-    (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
-    (dolist (elem system_path)
-      (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*bin" elem)
-        (setq dir (directory-files elem))
-        (dolist (file dir)
-          (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*python3.[0-9]*.exe" file)
-            (setq treemacs-python-executable (concat elem "\\" file)))))))
+    (setq treemacs-python-executable (car (get_file_using_regex "chocolatey" "python[0-9]?.[0-9]+?.exe"))))
 
   (defun efs/toggle-treemacs ()
     (treemacs)
@@ -1285,11 +1275,7 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
     (company-mode . company-box-mode))
 
   (defun efs/company-c-headers-config ()
-    (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
-    (dolist (elem system_path)
-      (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*mingw[a-zA-Z0-9\\\/\.\:\_\+\-]*include" elem)
-        (setq temp_var elem)
-        (add-to-list 'company-c-headers-path-system temp_var))))
+    (add-to-list 'company-c-headers-path-system (car (get_directories_using_regex "gcc"))))
 
   (use-package company-c-headers
     :config
@@ -1315,13 +1301,10 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
     (when (require 'dap-cpptools nil 'noerror)
       (dap-cpptools-setup)))
 
-  (defun find_debugger_path (&optional debugger)
-    (setq system_path (cl-remove-duplicates (split-string (getenv "PATH") ";") :test 'string=))
-    (dolist (elem system_path)
-      (when (string-match "[a-zA-Z0-9\\\/\.\:\_\+\-]*LLVM\\bin" elem)
-        return elem)))
+  (defun find_debugger_path ()
+    (car (get_file_using_regex "LLVM" "lldb.exe")))
 
-  (defun init-dap-json (&optional app &optional debugger)
+  (defun init-dap-json (&optional app)
     (interactive "sApplication name: \nsDebugger name: ")
     (with-temp-file "launch.json"
         (insert (format "{
@@ -1341,7 +1324,7 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
               \"MIDebuggerPath\": \"%s\"
           }
       ]
-  }" app debugger (find_debugger_path debugger)))))
+  }" app "lldb.exe" (find_debugger_path)))))
 
   (use-package dap-mode
     :hook
