@@ -39,7 +39,7 @@ A macro returning the system env path variables.
 
 *** get_directories_using_regex
 
-A macro to retrieve path for a specific target.
+A macro returning the paths with the target in it.
 
 #+begin_src emacs-lisp
 
@@ -54,7 +54,7 @@ A macro to retrieve path for a specific target.
 
 *** get_file_using_regex
 
-A macro to retrive the file at path.
+A macro returning the target file at path.
 
 #+begin_src emacs-lisp
 
@@ -65,6 +65,17 @@ A macro to retrive the file at path.
           (if (string-match file elem)
               (add-to-list 'result (format "%s\\%s" directory elem)))))
       result))
+
+#+end_src
+
+*** get_https_request
+
+A macro downloading a file at url.
+
+#+begin_src emacs-lisp
+
+  (defun get_https_request (url filename)
+    (url-copy-file url filename))
 
 #+end_src
 
@@ -251,113 +262,7 @@ A set of templates used when creating a new workspace directory.
 
   (defun init-gitignore ()
       (interactive)
-      (with-temp-file "\.gitignore"
-        (insert "# Created by https://www.toptal.com/developers/gitignore/api/cmake,c++,c
-  # Edit at https://www.toptal.com/developers/gitignore?templates=cmake,c++,c
-
-  ### C ###
-  # Prerequisites
-  ,*.d
-
-  # Object files
-  ,*.o
-  ,*.ko
-  ,*.obj
-  ,*.elf
-
-  # Linker output
-  ,*.ilk
-  ,*.map
-  ,*.exp
-
-  # Precompiled Headers
-  ,*.gch
-  ,*.pch
-
-  # Libraries
-  ,*.lib
-  ,*.a
-  ,*.la
-  ,*.lo
-
-  # Shared objects (inc. Windows DLLs)
-  ,*.dll
-  ,*.so
-  ,*.so.*
-  ,*.dylib
-
-  # Executables
-  ,*.exe
-  ,*.out
-  ,*.app
-  ,*.i*86
-  ,*.x86_64
-  ,*.hex
-
-  # Debug files
-  ,*.dSYM/
-  ,*.su
-  ,*.idb
-  ,*.pdb
-
-  # Kernel Module Compile Results
-  ,*.mod*
-  ,*.cmd
-  .tmp_versions/
-  modules.order
-  Module.symvers
-  Mkfile.old
-  dkms.conf
-
-  ### C++ ###
-  # Prerequisites
-
-  # Compiled Object files
-  ,*.slo
-
-  # Precompiled Headers
-
-  # Compiled Dynamic libraries
-
-  # Fortran module files
-  ,*.mod
-  ,*.smod
-
-  # Compiled Static libraries
-  ,*.lai
-
-  # Executables
-
-  ### CMake ###
-  CMakeLists.txt.user
-  CMakeCache.txt
-  CMakeFiles
-  CMakeScripts
-  Testing
-  Makefile
-  cmake_install.cmake
-  install_manifest.txt
-  compile_commands.json
-  CTestTestfile.cmake
-  _deps
-
-  ### CMake Patch ###
-  # External projects
-  ,*-prefix/
-
-  # End of https://www.toptal.com/developers/gitignore/api/cmake,c++,c
-
-  ### wildcard removing trash files created by vim, notepad++
-  ,*.bak
-  ,*.un~
-  ,*.txt~
-  ,*~
-
-  ### remove build dir
-  out/*
-
-  ### remove visual studio chached dir
-  .vs")))
+      (get_https_request "https://github.com/guyllaumedemers/emacs-get-request/blob/master/.gitignore" ".gitignore"))
 
 #+end_src
 
@@ -435,7 +340,27 @@ Build tools will execute steps to produce *targets* with compilers, linkers, sta
 
 A few template files to properly start with CMake.
 
+***** Modules
+
+A set of modules to be used in cmake projects.
+
+****** GitSubmodules
+
+A git module that synch-update your project submodules.
+
+#+begin_src emacs-lisp
+
+  (defun cmake-init-git-module ()
+    (interactive)
+    (get_https_request "https://github.com/guyllaumedemers/emacs-get-request/blob/master/git.cmake" "git.cmake"))
+
+#+end_src
+
 ***** Directory
+
+A set of commands to generate your project directory tree.
+
+****** Tree
 
 Setup the current directory as follow:
 
@@ -470,6 +395,8 @@ Setup the current directory as follow:
 
 #+end_src
 
+****** Root
+
 Run the following command at directory to create the above tree-like directories.
 
 #+begin_src emacs-lisp
@@ -484,6 +411,8 @@ Run the following command at directory to create the above tree-like directories
       (shell-command (format "cd %s && touch > %s\\.keep" project elem))))
 
 #+end_src
+
+****** Application
 
 Run the following command at directory to create the Application tree-like directories.
 
@@ -500,35 +429,43 @@ Run the following command at directory to create the Application tree-like direc
 
 ***** CMakeLists.txt
 
+A set of templates for generating listfile.
+
+****** Root
+
 Root listfile.
 
 #+begin_src emacs-lisp
 
   (setq cmake_version (car (last (split-string (car (split-string (shell-command-to-string "cmake --version") "\n")) " "))))
 
-  (defun cmake-init-root-cmakelist (&optional project)
+  (defun cmake-init-root-cmakelist (project)
     (interactive "sProject name: ")
     (with-temp-file "CMakeLists.txt"
       (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nadd_subdirectory(\"doc\")\nadd_subdirectory(\"extern\")\nadd_subdirectory(\"src\" \"bin\")\nadd_subdirectory(\"test\")" cmake_version project))))
 
 #+end_src
 
+****** Source
+
 Src listfile.
 
 #+begin_src emacs-lisp
 
-  (defun cmake-init-src-cmakelist (&optional app)
+  (defun cmake-init-src-cmakelist (app)
     (interactive "sSubdirectory name: ")
     (with-temp-file "CMakeLists.txt"
       (insert (format "add_subdirectory(\"%s\")" app))))
 
 #+end_src
 
+****** Application
+
 Application listfile.
 
 #+begin_src emacs-lisp
 
-  (defun cmake-init-app-cmakelist (&optional app)
+  (defun cmake-init-app-cmakelist (app)
     (interactive "sApplication name: ")
     (with-temp-file "CMakeLists.txt"
       (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nfile(GLOB_RECURSE \"${PROJECT_NAME}_SRC\" \"${CMAKE_CURRENT_SOURCE_DIR}\" \"*.cc\")\n\nadd_library(\"${PROJECT_NAME}lib\" OBJECT \"${${PROJECT_NAME}_SRC}\")\ntarget_include_directories(\"${PROJECT_NAME}lib\" PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/includes\")\n\n##temp executable\nget_target_property(OUT \"${PROJECT_NAME}lib\" SOURCES)\nadd_executable(\"${PROJECT_NAME}\" ${OUT})" cmake_version app))))
@@ -545,36 +482,6 @@ Hello World.cc
     (interactive)
     (with-temp-file "Main.cc"
       (insert "#pragma once\n\n#include <cstdio>\n\nint main(int argc, char* argv[])\n{\n\tstd::printf(\"HelloWorld!\");\n}")))
-
-#+end_src
-
-***** Modules
-
-A set of modules to be used in cmake projects.
-
-****** GitSubmodules
-
-A git module that synch-update your project submodules.
-
-#+begin_src emacs-lisp
-
-  (defun cmake-init-git-module ()
-    (interactive)
-    (with-temp-file "git.cmake"
-      (insert "find_package(Git QUIET)
-  if(GIT_FOUND AND EXISTS \"${CMAKE_SOURCE_DIR}/.git\")
-    # Update submodules as needed
-    option(GIT_SUBMODULE \"Check submodules during build\" ON)
-    if(GIT_SUBMODULE)
-      message(STATUS \"Submodule update\")
-      execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        RESULT_VARIABLE GIT_SUBMOD_RESULT)
-      if(NOT GIT_SUBMOD_RESULT EQUAL \"0\")
-        message(FATAL_ERROR \"git submodule update --init --recursive failed with ${GIT_SUBMOD_RESULT}, please checkout submodules\")
-      endif()
-    endif()
-  endif()")))
 
 #+end_src
 
