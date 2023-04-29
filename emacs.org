@@ -116,7 +116,7 @@ Executables for bash. windows emacs shell behave like cmd which cause issue when
   (defun set-unix-system-shell (exec)
     (interactive "sExecutable name: ")
     (when (eq system-type 'windows-nt)
-      (let ((shell (car (get_file_using_regex "Git" (format "%s" exec)))))
+      (let ((shell (car (get_file_using_regex "Git" (format "^%s" exec)))))
         (setq shell-file-name (format "%s" shell))
         (shell-command (format "setx SHELL \'%s\'" shell)))))
 
@@ -1167,8 +1167,7 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     (setq lsp-clients-clangd-executable (car (get_file_using_regex "LLVM" "clangd.exe"))))
 
   (defun efs/lsp-clients-lib-setup ()
-    (let ((elem (car (get_directories_using_regex "gcc"))))
-      (add-to-list 'lsp-clients-clangd-library-directories elem)))
+    (add-to-list 'lsp-clients-clangd-library-directories (car (get_directories_using_regex "gcc"))))
 
   (use-package lsp-mode
     :commands (lsp lsp-deferred)
