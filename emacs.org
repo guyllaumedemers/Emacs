@@ -1147,7 +1147,7 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
     (car (get_file_using_regex "LLVM" "lldb.exe")))
 
   (defun init-dap-json (&optional app)
-    (interactive "sApplication name: \nsDebugger name: ")
+    (interactive "sApplication name: ")
     (with-temp-file "launch.json"
         (insert (format "{
       \"version\": \"0.2.0\",
