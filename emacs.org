@@ -1146,7 +1146,7 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
   (defun find_debugger_path ()
     (car (get_file_using_regex "LLVM" "lldb.exe")))
 
-  (defun init-dap-json (&optional app)
+  (defun init-dap-json (app)
     (interactive "sApplication name: ")
     (with-temp-file "launch.json"
         (insert (format "{
@@ -1156,17 +1156,17 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
               \"name\": \"Debug Emacs\",
               \"type\": \"cppdbg\",
               \"request\": \"launch\",
-              \"program\": \"${workspaceFolder}/out/build/bin/%s\",
+              \"program\": \"${workspaceFolder}/out/build/bin/%s/%s.exe\",
               \"args\": [\"-q\"],
               \"stopAtEntry\": false,
               \"cwd\": \"${workspaceFolder}\",
               \"environment\": [],
               \"externalConsole\": false,
               \"MIMode\": \"%s\",
-              \"MIDebuggerPath\": \"%s\"
+              \"MIDebuggerPath\": %S
           }
       ]
-  }" app "lldb.exe" (find_debugger_path)))))
+  }" app app "lldb" (find_debugger_path))))) ;; Special case - %S MIDebuggerPath keep "\\"
 
   (use-package dap-mode
     :hook
