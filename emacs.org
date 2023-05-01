@@ -298,7 +298,7 @@ https://clang.llvm.org/docs/JSONCompilationDatabase.html
   (defun cmake-init-shell-config ()
     (interactive)
     ;; note: string output in .sh later invoke in bash shell so \ behaviour need to be handled twice
-    (shell-command (format "echo cmake -S . -B \"\'out\\build\'\" -G \"%s\" -D CMAKE_BUILD_TYPE=\"%s\" -D CMAKE_C_COMPILER=\"%s\" -D CMAKE_CXX_COMPILER=\"%s\" -D CMAKE_EXPORT_COMPILE_COMMANDS=\'1\' -D CMAKE_CXX_EXTENSIONS=\'OFF\' -D CMAKE_CXX_STANDARD_REQUIRED=\'ON\' > cmake-config.sh" build_system compilation_mode c_compiler c++_compiler)))
+    (shell-command (format "echo cmake -S . -B \"\'out\\build\'\" -G \"%s\" -D CMAKE_BUILD_TYPE=\"%s\" -D CMAKE_C_COMPILER=\"%s\" -D CMAKE_CXX_COMPILER=\"%s\" -D CMAKE_EXPORT_COMPILE_COMMANDS=\"\'1\'\" > cmake-config.sh" build_system compilation_mode c_compiler c++_compiler)))
 
 #+end_src
 
