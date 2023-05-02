@@ -236,6 +236,22 @@ Calling the default and official Windows' C++ compiler MSVC (Microsoft Visual C+
 
 #+end_src
 
+*** Static Analysis
+
+In computer science, static program analysis (or static analysis) is the analysis of computer programs performed without executing them, in contrast with dynamic program analysis, which is performed on programs during their execution.
+
+**** CppCheck
+
+Cppcheck is a static analysis tool for C/C++ code. It provides unique code analysis to detect bugs and focuses on detecting undefined behaviour and dangerous coding constructs. The goal is to have very few false positives. Cppcheck is designed to be able to analyze your C/C++ code even if it has non-standard syntax (common in embedded projects).
+
+#+begin_src emacs-lisp
+
+  (defun install-cppcheck ()
+    (interactive)
+    (shell-command "choco install cppcheck -y"))
+
+#+end_src
+
 ** Languages
 
 Some emacs packages rely on languages like python in order to properly work. The following programming languages are required to be install to prevent package errors. *See Messages buffer for more information on missing requirements*
@@ -1123,6 +1139,18 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
     :config
     (add-to-list 'company-backends 'company-c-headers)
     (efs/company-c-headers-config))
+
+#+end_src
+
+*** flycheck
+
+Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs, intended as replacement for the older Flymake extension which is part of GNU Emacs.
+
+#+begin_src emacs-lisp
+
+  (use-package flycheck
+    :hook
+    (lsp-mode . flycheck-mode))
 
 #+end_src
 
