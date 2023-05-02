@@ -1154,6 +1154,15 @@ Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs, intende
 
 #+end_src
 
+*** Clang-include-fixer
+
+#+begin_src emacs-lisp
+
+  (add-to-list 'load-path (format "%s\\%s" (replace-regexp-in-string "bin" "share" (car (get_directories_using_regex "LLVM"))) "clang"))
+  (require 'clang-include-fixer)
+
+#+end_src
+
 ** dap-mode
 
 [[https://emacs-lsp.github.io/dap-mode/][dap-mode]] is an excellent package for bringing rich debugging capabilities to Emacs via the [[https://microsoft.github.io/debug-adapter-protocol/][Debug Adapter Protocol]]. You should check out the [[https://emacs-lsp.github.io/dap-mode/page/configuration/][configuration docs]] to learn how to configure the debugger for your language.  Also make sure to check out the documentation for the debug adapter to see what configuration parameters are available to use for your debug templates!
