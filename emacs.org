@@ -404,6 +404,7 @@ Setup the current directory as follow:
   +--test
   +--.git
   +--.gitsubmodules
+  +--.dir-locals.el
   +--CMakeLists.txt
   +--README.md
   +--cmake-config.sh
@@ -440,6 +441,33 @@ Run the following command at directory to create the Application tree-like direc
     (setq dir_folders (split-string (shell-command-to-string (format "cd %s && ls -d */" app)) "\n"))
     (dolist (elem dir_folders)
       (shell-command (format "cd %s && touch > %s\\.keep" app elem))))
+
+#+end_src
+
+****** Include path
+
+Run the following command at the application level to handle include directories in emacs.
+
+#+begin_src emacs-lisp
+
+  (defun recursive-search-includes ()
+    ;; cd src
+    ;; get all directories at point
+    ;; search for includes folder
+    ;; recurse until no match
+    ;; run regex on each directory path returned
+    ;; prepend -I and wrap the path in \" \" to properly append the list below
+    )
+
+  (defun set-project-include-directories (directories)
+    (let (result)
+      (setq result "((nil . ((company-clang-arguments . (%s)))))")
+      (setq result (format result directories))
+      result))
+
+  (defun init-dir-locals ()
+    (interactive)
+    (shell-command (format "echo \'%s\' > .dir-locals.el" (set-project-include-directories (recursive-search-includes)))))
 
 #+end_src
 
@@ -484,7 +512,7 @@ Application listfile.
   (defun cmake-init-app-cmakelist (app)
     (interactive "sApplication name: ")
     (with-temp-file "CMakeLists.txt"
-      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nfile(GLOB_RECURSE \"${PROJECT_NAME}_SRC\" \"${CMAKE_CURRENT_SOURCE_DIR}\" \"*.cc\")\n\nadd_library(\"${PROJECT_NAME}lib\" OBJECT \"${${PROJECT_NAME}_SRC}\")\n\nset_property(TARGET \"${PROJECT_NAME}lib\" PROPERTY CMAKE_CXX_STANDARD \"17\")\nset_property(TARGET \"${PROJECT_NAME}lib\" PROPERTY CMAKE_CXX_STANDARD_REQUIRED \"ON\")\nset_property(TARGET \"${PROJECT_NAME}lib\" PROPERTY CMAKE_CXX_EXTENSIONS \"OFF\")\n\ntarget_include_directories(\"${PROJECT_NAME}lib\" PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/includes\")" cmake_version app))))
+      (insert (format "cmake_minimum_required(VERSION %s)\nproject(%s VERSION 0.0.1)\n\nfile(GLOB_RECURSE \"${PROJECT_NAME}_SRC\" \"${CMAKE_CURRENT_SOURCE_DIR}\" \"*.cc\")\n\nadd_library(\"${PROJECT_NAME}lib\" OBJECT \"${${PROJECT_NAME}_SRC}\")\n\nset_property(TARGET \"${PROJECT_NAME}lib\" PROPERTY CXX_STANDARD \"17\")\nset_property(TARGET \"${PROJECT_NAME}lib\" PROPERTY CXX_STANDARD_REQUIRED \"ON\")\nset_property(TARGET \"${PROJECT_NAME}lib\" PROPERTY CXX_EXTENSIONS \"OFF\")\n\ntarget_include_directories(\"${PROJECT_NAME}lib\" PUBLIC \"${CMAKE_CURRENT_SOURCE_DIR}/includes\")" cmake_version app))))
 
 #+end_src
 
@@ -1135,10 +1163,14 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
   (defun efs/company-c-headers-config ()
     (add-to-list 'company-c-headers-path-system (car (get_directories_using_regex "gcc"))))
 
+  (defun efs/company-backends-config ()
+    (setq company-backends (remove 'company-semantic company-backends))
+    (add-to-list 'company-backends 'company-c-headers))
+
   (use-package company-c-headers
     :config
-    (add-to-list 'company-backends 'company-c-headers)
-    (efs/company-c-headers-config))
+    (efs/company-c-headers-config)
+    (efs/company-backends-config))
 
 #+end_src
 
