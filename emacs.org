@@ -79,6 +79,21 @@ A macro downloading a file at url.
 
 #+end_src
 
+** Shell Scripts
+
+A set of Scripts to run in Shell.
+
+*** Create Empty Shell Script 
+
+#+begin_src emacs-lisp
+
+  (defun init-empty-shell-script (script)
+    (interactive "sScript name: ")
+    (when (string-match (format "which: no %s" script) (shell-command-to-string (format "which %s" script)))
+      (shell-command (format "echo \\#\\!%S > \~/bin/%s" shell-file-name script))))
+
+#+end_src
+
 * System Config (Windows-nt)
 
 Custom config variable that Unix based packages expect to exist.
@@ -96,7 +111,7 @@ The HOME environment variable that has the default value /home/<username>) on Li
   (defun set-unix-system-home ()
     (interactive)
     (if (eq system-type 'windows-nt)
-        (shell-command "setx HOME %HOME%")))
+        (shell-command "setx HOME $HOME")))
 
 #+end_src
 
@@ -114,7 +129,7 @@ By adding the directory ~/bin or C:\Users\<user>\bin to PATH variable it makes e
   (defun set-unix-system-path ()
     (interactive)
     (if (eq system-type 'windows-nt)
-        (shell-command "setx PATH \"%PATH%;%USERPROFILE%\\bin\"")))
+        (shell-command "setx PATH \"$PATH;$USERPROFILE\\bin\"")))
 
 #+end_src
 
@@ -140,6 +155,8 @@ Set basic requirements for your operating system.
 ** Chocolatey (distribution service - package manager)
 
 Chocolatey is a machine-level, command-line package manager and installer for software on Microsoft Windows. It uses the NuGet packaging infrastructure and Windows PowerShell to simplify the process of downloading and installing software.
+
+Commands: https://docs.chocolatey.org/en-us/choco/commands/ 
 
 #+begin_src emacs-lisp
 
@@ -198,7 +215,7 @@ CMake is cross-platform free and open-source software for build automation, test
 
   (defun install-cmake ()
     (interactive)
-    (shell-command "choco install cmake --installargs '\"ADD_CMAKE_TO_PATH=User\"' --use-remembered-arguments -y"))
+    (shell-command "choco install cmake --installargs \'\"ADD_CMAKE_TO_PATH=User\"\' --use-remembered-arguments -y"))
 
 #+end_src
 
@@ -286,11 +303,22 @@ A set of templates used when creating a new workspace directory.
 
 CMake build system generator key steps to create build system required files.
 
+***** Build toolchain.cmake
+
+#+begin_src emacs-lisp
+
+  ;; put under root to pre-configure clang with target
+  (defun cmake-init-root-toolchain ()
+    (interactive)
+    (get_https_request "https://github.com/guyllaumedemers/emacs-get-request/blob/master/toolchain.cmake" "toolchain.cmake"))
+
+#+end_src
+
 ***** Configuration
 
 This stage is about reading project details stored in a directory, called the source tree, and preparing an output directory or build tree for the generation stage.
 
-****** Running CMake Config Script
+****** Running CMake-Config.sh
 
 #+begin_src emacs-lisp
 
@@ -300,21 +328,26 @@ This stage is about reading project details stored in a directory, called the so
 
 #+end_src
 
-****** Building CMake Config Script
+****** Build CMake-Config.sh
 
 https://clang.llvm.org/docs/JSONCompilationDatabase.html
 
 #+begin_src emacs-lisp
 
-  (setq build_system "\'Unix Makefiles\'")
-  (setq compilation_mode "\'DEBUG\'")
-  (setq c_compiler "\'clang\'")
-  (setq c++_compiler "\'clang++\'")
+  ;; clang flags
+  ;; https://wetmelon.github.io/clang-on-windows.html 
 
-  (defun cmake-init-shell-config ()
+  ;; cmake flags
+  (setq build_path "\'out\\build\'")
+  (setq build_system "\'Unix Makefiles\'")
+  (setq build_toolchain "\'.\\toolchain.cmake\'")
+  (setq compilation_mode "\'DEBUG\'")
+  (setq compile_commands "\'ON\'")
+
+  (defun init-cmake-config-toolchain ()
     (interactive)
     ;; note: string output in .sh later invoke in bash shell so \ behaviour need to be handled twice
-    (shell-command (format "echo cmake -S . -B \"\'out\\build\'\" -G \"%s\" -D CMAKE_BUILD_TYPE=\"%s\" -D CMAKE_C_COMPILER=\"%s\" -D CMAKE_CXX_COMPILER=\"%s\" -D CMAKE_EXPORT_COMPILE_COMMANDS=\"\'1\'\" > cmake-config.sh" build_system compilation_mode c_compiler c++_compiler)))
+    (shell-command (format "echo cmake -S . -B %S -G %S --toolchain %S -DCMAKE_BUILD_TYPE=%S -DCMAKE_EXPORT_COMPILE_COMMANDS=%S > cmake-config.sh" build_path build_system build_toolchain compilation_mode compile_commands)))
 
 #+end_src
 
@@ -332,7 +365,7 @@ After reading the project configuration, CMake will generate a *buildsystem* for
 
 Build tools will execute steps to produce *targets* with compilers, linkers, static and dynamic analysis tools, test frameworks, reporting tools, and anything else you can think of.
 
-****** Running CMake Build Script
+****** Running CMake-Build.sh
 
 #+begin_src emacs-lisp
 
@@ -342,13 +375,25 @@ Build tools will execute steps to produce *targets* with compilers, linkers, sta
 
 #+end_src
 
-****** Building CMake Build Script
+****** Create CMake-Build.sh
 
 #+begin_src emacs-lisp
 
-  (defun cmake-init-shell-build ()
+  (defun init-cmake-build-toolchain ()
     (interactive)
-    (shell-command "echo cmake --build \"\'out\\build\'\" > cmake-build.sh"))
+    (shell-command (format "echo cmake --build %S > cmake-build.sh" build_path)))
+
+#+end_src
+
+*** Debugging and Tracing
+
+CMake can be run with a multitude of options that allow you to peek under the hood. To get general information about variables, commands, macro, and other settings.
+
+#+begin_src emacs-lisp
+
+  (defun run-cmake-debug-trace (file)
+    (interactive "sOutput file name: ")
+    (shell-command (format "cmake --system-information %s" file)))
 
 #+end_src
 
@@ -356,29 +401,9 @@ Build tools will execute steps to produce *targets* with compilers, linkers, sta
 
 A few template files to properly start with CMake.
 
-***** Modules
-
-A set of modules to be used in cmake projects.
-
-****** GitSubmodules
-
-A git module that synch-update your project submodules.
-
-#+begin_src emacs-lisp
-
-  (defun cmake-init-git-module ()
-    (interactive)
-    (get_https_request "https://github.com/guyllaumedemers/emacs-get-request/blob/master/git.cmake" "git.cmake"))
-
-#+end_src
-
 ***** Directory
 
 A set of commands to generate your project directory tree.
-
-****** Tree
-
-Setup the current directory as follow:
 
 #+begin_src ditaa
 
@@ -418,7 +443,7 @@ Run the following command at directory to create the above tree-like directories
 
 #+begin_src emacs-lisp
 
-  (defun init-project-root-dir (&optional project)
+  (defun init-project-root-dir (project)
     (interactive "sProject name: ")
     (shell-command (format "mkdir -p %s && cd %s && mkdir -p {cmake,doc,extern,out,res,src,test}" project project))
     (setq dir_folders (split-string (shell-command-to-string (format "cd %s && ls -d */" project)) "\n"))
@@ -444,36 +469,38 @@ Run the following command at directory to create the Application tree-like direc
 
 #+end_src
 
-****** Include path
+****** HelloWorld.cc
 
-Run the following command at the application level to handle include directories in emacs.
+Hello World.cc
 
 #+begin_src emacs-lisp
 
-  (defun recursive-search-includes ()
-    ;; cd src
-    ;; get all directories at point
-    ;; search for includes folder
-    ;; recurse until no match
-    ;; run regex on each directory path returned
-    ;; prepend -I and wrap the path in \" \" to properly append the list below
-    )
-
-  (defun set-project-include-directories (directories)
-    (let (result)
-      (setq result "((nil . ((company-clang-arguments . (%s)))))")
-      (setq result (format result directories))
-      result))
-
-  (defun init-dir-locals ()
+  (defun init-main-cc ()
     (interactive)
-    (shell-command (format "echo \'%s\' > .dir-locals.el" (set-project-include-directories (recursive-search-includes)))))
+    (with-temp-file "Main.cc"
+      (insert "#pragma once\n\n#include <cstdio>\n\nint main(int argc, char* argv[])\n{\n\tstd::printf(\"HelloWorld!\");\n\treturn 0;\n}")))
+
+#+end_src
+
+***** Modules
+
+A set of modules to be used in cmake projects.
+
+****** CMake Module - Git
+
+A git module that synch-update your project submodules.
+
+#+begin_src emacs-lisp
+
+  (defun cmake-init-git-module ()
+    (interactive)
+    (get_https_request "https://github.com/guyllaumedemers/emacs-get-request/blob/master/git.cmake" "git.cmake"))
 
 #+end_src
 
 ***** CMakeLists.txt
 
-A set of templates for generating listfile.
+A set of shell templates for generating listfile.
 
 ****** Root
 
@@ -516,19 +543,6 @@ Application listfile.
 
 #+end_src
 
-***** Main.cc
-
-Hello World.cc
-
-#+begin_src emacs-lisp
-
-  (defun init-main-cc ()
-    (interactive)
-    (with-temp-file "Main.cc"
-      (insert "#pragma once\n\n#include <cstdio>\n\nint main(int argc, char* argv[])\n{\n\tstd::printf(\"HelloWorld!\");\n\treturn 0;\n}")))
-
-#+end_src
-
 ***** Master Command
 
 A master command to easilly initialize your project with the correct startup files using the commands defined above.
@@ -537,18 +551,6 @@ A master command to easilly initialize your project with the correct startup fil
 
   ;; spend time figuring out how to invoke emacs command from the shell terminal
   ;; without opening a new emacs frame
-
-#+end_src
-
-*** Debugging and Tracing
-
-CMake can be run with a multitude of options that allow you to peek under the hood. To get general information about variables, commands, macro, and other settings.
-
-#+begin_src emacs-lisp
-
-  (defun run-cmake-debug-trace (&optional file)
-    (interactive "sOutput file name: ")
-    (shell-command (format "cmake --system-information %s" file)))
 
 #+end_src
 
@@ -741,6 +743,14 @@ I am using the [[https://github.com/tonsky/FiraCode][Fira Code]] font for this c
 #+begin_src emacs-lisp
 
   (use-package all-the-icons
+    :config
+    ;; Use 'prepend for the NS and Mac ports or Emacs will crash.
+    (set-fontset-font t 'unicode (font-spec :family "all-the-icons") nil 'append)
+    (set-fontset-font t 'unicode (font-spec :family "file-icons") nil 'append)
+    (set-fontset-font t 'unicode (font-spec :family "Material Icons") nil 'append)
+    (set-fontset-font t 'unicode (font-spec :family "github-octicons") nil 'append)
+    (set-fontset-font t 'unicode (font-spec :family "FontAwesome") nil 'append)
+    (set-fontset-font t 'unicode (font-spec :family "Weather Icons") nil 'append)
     :if (display-graphic-p))
 
   (use-package all-the-icons-dired
@@ -1049,25 +1059,35 @@ The =which-key= integration adds helpful descriptions of the various keys so you
     (lsp-headerline-breadcrumb-mode))
 
   ;; clangd setup https://emacs-lsp.github.io/lsp-mode/page/lsp-clangd/ 
-  (defun efs/lsp-clients-exe-setup ()
+  (defun efs/lsp-clients-exec-setup ()
     (setq lsp-clients-clangd-executable (car (get_file_using_regex "LLVM" "clangd.exe"))))
 
-  (defun efs/lsp-clients-lib-setup ()
-    (add-to-list 'lsp-clients-clangd-library-directories (car (get_directories_using_regex "gcc"))))
+  (defun efs/lsp-clients-clangd-args-setup ()
+    (let (result)
+      (add-to-list 'result "--header-insertion=iwyu")
+      (add-to-list 'result "--completion-style=bundled")
+      (add-to-list 'result "--log=info")
+      (add-to-list 'result "--pretty")
+      (setq lsp-clients-clangd-args result)))
+
+  (defun efs/lsp-clients-clangd-include-directories-setup ()
+    (add-to-list 'lsp-clients-clangd-library-directories (car (last (get_directories_using_regex "mingw64")))))
 
   (use-package lsp-mode
-    :commands (lsp lsp-deferred)
+    :commands
+    (lsp lsp-deferred)
     :init
+    (efs/lsp-clients-exec-setup)
+    (efs/lsp-clients-clangd-args-setup)
     ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
     (setq lsp-keymap-prefix "C-c l")
-    (efs/lsp-clients-exe-setup)
     :hook
     (c-mode . lsp-deferred)
     (c++-mode . lsp-deferred)
     ;; if you want which-key integration
     (lsp-mode . lsp-enable-which-key-integration)
+    (lsp-mode . efs/lsp-clients-clangd-include-directories-setup)
     (lsp-mode . efs/lsp-mode-setup)
-    (lsp-mode . efs/lsp-clients-lib-setup)
     :config
     ;; The path to lsp-mode needs to be added to load-path as well as the
     ;; path to the `clients' subdirectory.
@@ -1186,15 +1206,6 @@ Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs, intende
 
 #+end_src
 
-*** Clang-include-fixer
-
-#+begin_src emacs-lisp
-
-  (add-to-list 'load-path (format "%s\\%s" (replace-regexp-in-string "bin" "share" (car (get_directories_using_regex "LLVM"))) "clang"))
-  (require 'clang-include-fixer)
-
-#+end_src
-
 ** dap-mode
 
 [[https://emacs-lsp.github.io/dap-mode/][dap-mode]] is an excellent package for bringing rich debugging capabilities to Emacs via the [[https://microsoft.github.io/debug-adapter-protocol/][Debug Adapter Protocol]]. You should check out the [[https://emacs-lsp.github.io/dap-mode/page/configuration/][configuration docs]] to learn how to configure the debugger for your language.  Also make sure to check out the documentation for the debug adapter to see what configuration parameters are available to use for your debug templates!
@@ -1257,7 +1268,7 @@ Provides syntax highlighting and indentation for CMakeLists.txt and *.cmake sour
 
 #+end_src
 
-**** cmake-ide
+*** cmake-ide
 
 cmake-ide is a package to enable IDE-like features on Emacs for CMake projects. It also supports non-CMake projects as long as a compilation database is generated out-of-band.This includes autocompletion and on-the-fly syntax checking in Emacs for CMake projects with minimal configuration.
 
@@ -1271,3 +1282,34 @@ cmake-ide is a package to enable IDE-like features on Emacs for CMake projects. 
   ;;   (cmake-ide-setup))
 
 #+end_src
+
+** Compiler
+
+A set of tools related to compilers.
+
+*** Clang-include-fixer
+
+One of the major nuisances of C++ compared to other languages is the manual management of #include directives in any file. clang-include-fixer addresses one aspect of this problem by providing an automated way of adding #include directives for missing symbols in one translation unit.
+
+#+begin_src emacs-lisp
+
+  (add-to-list 'load-path (format "%s\\%s" (replace-regexp-in-string "bin" "share" (car (get_directories_using_regex "LLVM"))) "clang"))
+  (require 'clang-include-fixer)
+
+#+end_src
+
+*** Clangd
+
+Clangd emulates how clang would interpret a file. By default, it behaves roughly as clang $FILENAME, but real projects usually require setting the include path (with the -I flag), defining preprocessor symbols, configuring warnings etc.
+
+https://clangd.llvm.org/config.html https://clangd.llvm.org/design/indexing  
+
+#+begin_src emacs-lisp
+
+  (defun init-clangd ()
+    (interactive)
+    (get_https_request "https://github.com/guyllaumedemers/emacs-get-request/blob/master/.clangd" ".clangd"))
+
+#+end_src
+
+
