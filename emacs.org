@@ -738,19 +738,19 @@ I am using the [[https://github.com/tonsky/FiraCode][Fira Code]] font for this c
 
 [[https://github.com/seagle0128/doom-modeline][doom-modeline]] is a very attractive and rich (yet still minimal) mode line configuration for Emacs.  The default configuration is quite good but you can check out the [[https://github.com/seagle0128/doom-modeline#customize][configuration options]] for more things you can enable or disable.
 
-*NOTE:* The first time you load your configuration on a new machine, you'll need to run `M-x all-the-icons-install-fonts` so that mode line icons display correctly.
+*NOTE:* The first time you load your configuration on a new machine, you'll need to run M-x all-the-icons-install-fonts` so that mode line icons display correctly. Also run M-x nerd-icons-install-fonts if emacs modeline icons are not displaying. Make sure downloaded fonts are installed on your Operating system and reload emacs.
 
 #+begin_src emacs-lisp
 
   (use-package all-the-icons
     :config
     ;; Use 'prepend for the NS and Mac ports or Emacs will crash.
-    (set-fontset-font t 'unicode (font-spec :family "all-the-icons") nil 'append)
-    (set-fontset-font t 'unicode (font-spec :family "file-icons") nil 'append)
-    (set-fontset-font t 'unicode (font-spec :family "Material Icons") nil 'append)
-    (set-fontset-font t 'unicode (font-spec :family "github-octicons") nil 'append)
-    (set-fontset-font t 'unicode (font-spec :family "FontAwesome") nil 'append)
-    (set-fontset-font t 'unicode (font-spec :family "Weather Icons") nil 'append)
+    ;; (set-fontset-font t 'unicode (font-spec :family "all-the-icons") nil 'append)
+    ;; (set-fontset-font t 'unicode (font-spec :family "file-icons") nil 'append)
+    ;; (set-fontset-font t 'unicode (font-spec :family "Material Icons") nil 'append)
+    ;; (set-fontset-font t 'unicode (font-spec :family "github-octicons") nil 'append)
+    ;; (set-fontset-font t 'unicode (font-spec :family "FontAwesome") nil 'append)
+    ;; (set-fontset-font t 'unicode (font-spec :family "Weather Icons") nil 'append)
     :if (display-graphic-p))
 
   (use-package all-the-icons-dired
