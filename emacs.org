@@ -295,7 +295,7 @@ A set of templates used when creating a new workspace directory.
 
   (defun init-gitignore ()
       (interactive)
-      (get_https_request "https://github.com/guyllaumedemers/emacs-get-request/blob/master/.gitignore" ".gitignore"))
+      (get_https_request "https://raw.githubusercontent.com/guyllaumedemers/emacs-get-request/master/.gitignore" ".gitignore"))
 
 #+end_src
 
@@ -310,7 +310,7 @@ CMake build system generator key steps to create build system required files.
   ;; put under root to pre-configure clang with target
   (defun cmake-init-root-toolchain ()
     (interactive)
-    (get_https_request "https://github.com/guyllaumedemers/emacs-get-request/blob/master/toolchain.cmake" "toolchain.cmake"))
+    (get_https_request "https://raw.githubusercontent.com/guyllaumedemers/emacs-get-request/master/toolchain.cmake" "toolchain.cmake"))
 
 #+end_src
 
@@ -494,7 +494,7 @@ A git module that synch-update your project submodules.
 
   (defun cmake-init-git-module ()
     (interactive)
-    (get_https_request "https://github.com/guyllaumedemers/emacs-get-request/blob/master/git.cmake" "git.cmake"))
+    (get_https_request "https://raw.githubusercontent.com/guyllaumedemers/emacs-get-request/master/git.cmake" "git.cmake"))
 
 #+end_src
 
@@ -1308,7 +1308,7 @@ https://clangd.llvm.org/config.html https://clangd.llvm.org/design/indexing
 
   (defun init-clangd ()
     (interactive)
-    (get_https_request "https://github.com/guyllaumedemers/emacs-get-request/blob/master/.clangd" ".clangd"))
+    (get_https_request "https://raw.githubusercontent.com/guyllaumedemers/emacs-get-request/master/.clangd" ".clangd"))
 
 #+end_src
 
