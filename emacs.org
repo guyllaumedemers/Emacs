@@ -167,6 +167,22 @@ Commands: https://docs.chocolatey.org/en-us/choco/commands/
 
 #+end_src
 
+https://github.com/chocolatey/choco/issues/797
+
+#+begin_src emacs-lisp
+
+  ;; makes sure the upgrade process doesnt remove your install configuration
+  (defun choco-enable-remember-args()
+    (interactive)
+    (shell-command "choco feature enable -n useRememberedArgumentsForUpgrades"))
+
+  ;; double check the feature list to confirm the above command was set
+  (defun choco-feature-list ()
+    (interactive)
+    (shell-command "choco feature list"))
+
+#+end_src
+
 ** Tools
 
 Set of tools, bash terminal, compilers and build system generator.
@@ -179,7 +195,7 @@ Git is a distributed version control system that tracks changes in any set of co
 
   (defun install-git ()
     (interactive)
-    (shell-command "choco install git --params \"'/GitAndUnixToolsOnPath'\" --use-remembered-arguments -y"))
+    (shell-command "choco install git --params \"'/GitAndUnixToolsOnPath'\" -y"))
 
 #+end_src
 
@@ -215,7 +231,7 @@ CMake is cross-platform free and open-source software for build automation, test
 
   (defun install-cmake ()
     (interactive)
-    (shell-command "choco install cmake --installargs \'\"ADD_CMAKE_TO_PATH=User\"\' --use-remembered-arguments -y"))
+    (shell-command "choco install cmake --installargs \"'ADD_CMAKE_TO_PATH=System'\" -y"))
 
 #+end_src
 
