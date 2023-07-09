@@ -1,4 +1,3 @@
-
 #+title: Emacs From Scratch Configuration
 #+PROPERTY: header-args:emacs-lisp :tangle ./init.el :mkdirp yes
 
@@ -310,8 +309,8 @@ A set of templates used when creating a new workspace directory.
 #+begin_src emacs-lisp
 
   (defun init-gitignore ()
-      (interactive)
-      (get_https_request "https://raw.githubusercontent.com/guyllaumedemers/emacs-get-request/master/.gitignore" ".gitignore"))
+    (interactive)
+    (get_https_request "https://raw.githubusercontent.com/guyllaumedemers/emacs-get-request/master/.gitignore" ".gitignore"))
 
 #+end_src
 
@@ -570,9 +569,72 @@ A master command to easilly initialize your project with the correct startup fil
 
 #+end_src
 
+* Package System Setup
+
+Emacs has a built in package manager but it doesn't make it easy to automatically install packages on a new system the first time you pull down your configuration.  [[https://github.com/jwiegley/use-package][use-package]] is a really helpful package used in this configuration to make it a lot easier to automate the installation and configuration of everything else we use.
+
+#+begin_src emacs-lisp
+
+  (progn
+    ;; init package sources
+    (when (require 'package nil 'noerror)
+      (setq package-archives '(
+			       ("melpa" . "https://melpa.org/packages/")
+			       ("org" . "https://orgmode.org/elpa/")
+			       ("elpa" . "https://elpa.gnu.org/packages/")))
+      (package-initialize)
+      ;; refresh archive description list
+      (unless package-archive-contents (package-refresh-contents))
+      ;; install/update use-package
+      (unless (package-installed-p 'use-package) (package-install 'use-package))
+      ;; use-package ensure config
+      (when (require 'use-package nil 'noerror)
+	(setq use-package-always-ensure t))))
+
+#+end_src
+
 * Emacs System Config
 
 A set of config specific to emacs that makes your life more pleasing.
+
+** Startup Performance
+
+Display emacs Startup time.
+
+#+begin_src emacs-lisp
+
+  ;; The default is 800 kilobytes.  Measured in bytes.
+  (setq gc-cons-threshold (* 50 1000 1000)) 
+
+  (defun efs/display-startup-time ()
+    (message "Emacs loaded in %s with %d garbage collections."
+             (format "%.2f seconds"
+                     (float-time
+                      (time-subtract after-init-time before-init-time)))
+             gcs-done))
+
+  (add-hook 'emacs-startup-hook #'efs/display-startup-time)
+
+#+end_src
+
+** Keep Folders Clean
+
+We use the [[https://github.com/emacscollective/no-littering/blob/master/no-littering.el][no-littering]] package to keep folders where we edit files and the Emacs configuration folder clean!  It knows about a wide variety of variables for built in Emacs features as well as those from community packages so it can be much easier than finding and setting these variables yourself.
+
+#+begin_src emacs-lisp
+
+  ;; NOTE: If you want to move everything out of the ~/.emacs.d folder
+  ;; reliably, set `user-emacs-directory` before loading no-littering!
+  ;; (setq user-emacs-directory "~/.cache/emacs")
+
+  ;;(require no-littering)
+
+  ;; no-littering doesn't set this by default so we must place
+  ;; auto save files in the same path as it uses for sessions
+  ;;(setq auto-save-file-name-transforms
+  ;;	`((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
+
+#+end_src
 
 ** Basic UI Configuration
 
@@ -597,11 +659,11 @@ This section configures basic UI settings that remove unneeded elements to make 
     (setq-default buffer-file-coding-system 'utf-8-unix)
     ;; Disable line numbers for some modes
     (dolist (mode '(
-                    org-mode-hook
-                    term-mode-hook
-                    shell-mode-hook
-                    treemacs-mode-hook
-                    eshell-mode-hook))
+		    org-mode-hook
+		    term-mode-hook
+		    shell-mode-hook
+		    treemacs-mode-hook
+		    eshell-mode-hook))
       (add-hook mode (lambda () (display-line-numbers-mode 0)))))
 
 #+end_src
@@ -639,30 +701,6 @@ set package customization to a different file to prevent poluting the init.el
 
 #+end_src
 
-* Package System Setup
-
-Emacs has a built in package manager but it doesn't make it easy to automatically install packages on a new system the first time you pull down your configuration.  [[https://github.com/jwiegley/use-package][use-package]] is a really helpful package used in this configuration to make it a lot easier to automate the installation and configuration of everything else we use.
-
-#+begin_src emacs-lisp
-
-  (progn
-    ;; init package sources
-    (when (require 'package nil 'noerror)
-      (setq package-archives '(
-                               ("melpa" . "https://melpa.org/packages/")
-                               ("org" . "https://orgmode.org/elpa/")
-                               ("elpa" . "https://elpa.gnu.org/packages/")))
-      (package-initialize)
-      ;; refresh archive description list
-      (unless package-archive-contents (package-refresh-contents))
-      ;; install/update use-package
-      (unless (package-installed-p 'use-package) (package-install 'use-package))
-      ;; use-package ensure config
-      (when (require 'use-package nil 'noerror)
-        (setq use-package-always-ensure t))))
-
-#+end_src
-
 * Keybinding Configuration
 
 ** Evil
@@ -675,14 +713,15 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
   (use-package general
+    :after evil
     :config
     (general-create-definer rune/leader-keys
       :keymaps '(normal insert visual emacs)
       :prefix "SPC"
       :global-prefix "C-SPC")
     (rune/leader-keys
-      "t"  '(:ignore t :which-key "toggles")
-      "tt" '(counsel-load-theme :which-key "choose theme"))) 
+     "t"  '(:ignore t :which-key "toggles")
+     "tt" '(counsel-load-theme :which-key "choose theme"))) 
 
   (use-package evil
     :init
@@ -700,6 +739,7 @@ This configuration uses [[https://evil.readthedocs.io/en/latest/index.html][evil
     (evil-set-initial-state 'dashboard-mode 'normal))
 
   (use-package evil-collection
+    :after evil
     :config
     (evil-collection-init))
 
@@ -714,9 +754,9 @@ Handy key bindings for invoking compilation command.
   (progn
     (global-set-key (kbd "<f9>") #'compile)
     (global-set-key (kbd "<C-f9>")
-                    (lambda () (interactive)
-                      (save-buffer)
-                      (recompile))))
+		    (lambda () (interactive)
+		      (save-buffer)
+		      (recompile))))
 
 #+end_src
 
@@ -773,11 +813,16 @@ I am using the [[https://github.com/tonsky/FiraCode][Fira Code]] font for this c
     :hook
     (dired-mode . all-the-icons-dired-mode))
 
+
+#+end_src
+
+#+begin_src emacs-lisp
+
   (use-package doom-modeline
-    :custom
-    (doom-modeline-height 15)
     :init
-    (doom-modeline-mode 1))
+    (doom-modeline-mode 1)
+    :custom
+    (doom-modeline-height 15))
 
 #+end_src
 
@@ -788,10 +833,10 @@ I am using the [[https://github.com/tonsky/FiraCode][Fira Code]] font for this c
 #+begin_src emacs-lisp
 
   (use-package which-key
+    :defer 0
     :diminish which-key-mode
-    :init
-    (which-key-mode)
     :config
+    (which-key-mode)
     (setq which-key-idle-delay 1))
 
 #+end_src
@@ -807,33 +852,43 @@ I am using the [[https://github.com/tonsky/FiraCode][Fira Code]] font for this c
   (use-package ivy
     :diminish
     :bind (("C-s" . swiper)
-           :map ivy-minibuffer-map
-           ("TAB" . ivy-alt-done)
-           ("C-l" . ivy-alt-done)
-           ("C-j" . ivy-next-line)
-           ("C-k" . ivy-previous-line)
-           :map ivy-switch-buffer-map
-           ("C-k" . ivy-previous-line)
-           ("C-l" . ivy-done)
-           ("C-d" . ivy-switch-buffer-kill)
-           :map ivy-reverse-i-search-map
-           ("C-k" . ivy-previous-line)
-           ("C-d" . ivy-reverse-i-search-kill))
+	   :map ivy-minibuffer-map
+	   ("TAB" . ivy-alt-done)
+	   ("C-l" . ivy-alt-done)
+	   ("C-j" . ivy-next-line)
+	   ("C-k" . ivy-previous-line)
+	   :map ivy-switch-buffer-map
+	   ("C-k" . ivy-previous-line)
+	   ("C-l" . ivy-done)
+	   ("C-d" . ivy-switch-buffer-kill)
+	   :map ivy-reverse-i-search-map
+	   ("C-k" . ivy-previous-line)
+	   ("C-d" . ivy-reverse-i-search-kill))
     :config
     (ivy-mode 1))
 
-  (use-package all-the-icons-ivy-rich
-    :init
-    (all-the-icons-ivy-rich-mode 1))
-
   (use-package ivy-rich
+    :after ivy
     :init
     (ivy-rich-mode 1))
 
+#+end_src
+
+#+begin_src emacs-lisp
+
+  (use-package all-the-icons-ivy-rich
+    :after (all-the-icons ivy)
+    :init
+    (all-the-icons-ivy-rich-mode 1))
+
+#+end_src
+
+#+begin_src emacs-lisp
+
   (use-package counsel
     :bind (("C-M-j" . 'counsel-switch-buffer)
-           :map minibuffer-local-map
-           ("C-r" . 'counsel-minibuffer-history))
+	   :map minibuffer-local-map
+	   ("C-r" . 'counsel-minibuffer-history))
     :config
     (counsel-mode 1))
 
@@ -846,6 +901,7 @@ I am using the [[https://github.com/tonsky/FiraCode][Fira Code]] font for this c
 #+begin_src emacs-lisp
 
   (use-package helpful
+    :commands (helpful-callable helpful-variable helpful-command helpful-key)
     :custom
     (counsel-describe-function-function #'helpful-callable)
     (counsel-describe-variable-function #'helpful-variable)
@@ -870,18 +926,18 @@ The =efs/org-font-setup= function configures various text faces to tweak the siz
   (defun efs/org-font-setup ()
     ;; Replace list hyphen with dot
     (font-lock-add-keywords 'org-mode
-                            '(("^ *\\([-]\\) "
-                               (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+			    '(("^ *\\([-]\\) "
+			       (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
 
     ;; Set faces for heading levels
     (dolist (face '((org-level-1 . 1.2)
-                    (org-level-2 . 1.1)
-                    (org-level-3 . 1.05)
-                    (org-level-4 . 1.0)
-                    (org-level-5 . 1.1)
-                    (org-level-6 . 1.1)
-                    (org-level-7 . 1.1)
-                    (org-level-8 . 1.1)))
+		    (org-level-2 . 1.1)
+		    (org-level-3 . 1.05)
+		    (org-level-4 . 1.0)
+		    (org-level-5 . 1.1)
+		    (org-level-6 . 1.1)
+		    (org-level-7 . 1.1)
+		    (org-level-8 . 1.1)))
       (set-face-attribute (car face) nil :font "Fira Code Retina" :weight 'regular :height (cdr face)))
 
     ;; Ensure that anything that should be fixed-pitch in Org files appears that way
@@ -907,11 +963,12 @@ This section contains the basic configuration for =org-mode= plus the configurat
     (visual-line-mode 1))
 
   (use-package org
+    :pin org
+    :commands (org-capture org-agenda)
     :hook
     (org-mode . efs/org-mode-setup)
     :config
-    (setq org-ellipsis " ▾")
-    (efs/org-font-setup))
+    (setq org-ellipsis " ▾"))
 
 #+end_src
 
@@ -951,8 +1008,9 @@ To execute or export code in =org-mode= code blocks, you'll need to set up =org-
 
 #+begin_src emacs-lisp
 
-  (org-babel-do-load-languages 'org-babel-load-languages
-                               '((emacs-lisp . t)))
+  (with-eval-after-load 'org
+    (org-babel-do-load-languages 'org-babel-load-languages
+				 '((emacs-lisp . t))))
 
 #+end_src
 
@@ -965,9 +1023,9 @@ You can add more =src= block templates below by copying one of the lines and cha
 #+begin_src emacs-lisp
 
   ;; This is needed as of Org 9.2
-  (when (require 'org-tempo nil 'noerror)
-    (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
-    (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp")))
+  (with-eval-after-load 'org (when (require 'org-tempo nil 'noerror)
+                               (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+                               (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))))
 
 #+end_src
 
@@ -990,6 +1048,8 @@ This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-con
 
 * Development
 
+A set of tools to embeed standard ide feature.
+
 ** Projectile
 
 [[https://projectile.mx/][Projectile]] is a project management library for Emacs which makes it a lot easier to navigate around code projects for various languages.  Many packages integrate with Projectile so it's a good idea to have it installed even if you don't use its commands directly.
@@ -1008,9 +1068,10 @@ This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-con
     :config
     (projectile-mode))
 
-    (use-package counsel-projectile
-      :config
-      (counsel-projectile-mode))
+  (use-package counsel-projectile
+    :after projectile
+    :config
+    (counsel-projectile-mode))
 
 #+end_src
 
@@ -1022,13 +1083,15 @@ This snippet adds a hook to =org-mode= buffers so that =efs/org-babel-tangle-con
 
   ;; set magit package after forge so forge-add-default-bindings are disabled in magit
   (use-package magit
+    :commands magit-status
     :custom
     (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
   ;; NOTE: Make sure to configure a GitHub token before using this package!
   ;; - https://magit.vc/manual/forge/Token-Creation.html#Token-Creation
   ;; - https://magit.vc/manual/ghub/Getting-Started.html#Getting-Started
-  (use-package forge) 
+  (use-package forge
+    :after magit) 
 
 #+end_src
 
@@ -1057,6 +1120,8 @@ Emacs' built in commenting functionality =comment-dwim= (usually bound to =M-;=)
 
 * IDE Features with lsp-mode
 
+A set of tools to be run to simulate an ide in emacs.
+
 ** lsp-mode
 
 We use the excellent [[https://emacs-lsp.github.io/lsp-mode/][lsp-mode]] to enable IDE-like functionality for many different programming languages via "language servers" that speak the [[https://microsoft.github.io/language-server-protocol/][Language Server Protocol]].  Before trying to set up =lsp-mode= for a particular language, check out the [[https://emacs-lsp.github.io/lsp-mode/page/languages/][documentation for your language]] so that you can learn which language servers are available and how to install them.
@@ -1068,7 +1133,8 @@ The =which-key= integration adds helpful descriptions of the various keys so you
 #+begin_src emacs-lisp
 
   ;; required by lsp-mode
-  (use-package yasnippet)
+  (use-package yasnippet
+    :after lsp)
 
   (defun efs/lsp-mode-setup ()
     (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
@@ -1119,10 +1185,10 @@ The =which-key= integration adds helpful descriptions of the various keys so you
 #+begin_src emacs-lisp
 
   (use-package lsp-ui
-    :custom
-    (lsp-ui-doc-position 'bottom)
     :hook
-    (lsp-mode . lsp-ui-mode))
+    (lsp-mode . lsp-ui-mode)
+    :custom
+    (lsp-ui-doc-position 'bottom))
 
 #+end_src
 
@@ -1168,7 +1234,8 @@ Try these commands with =M-x=:
 
 #+begin_src emacs-lisp
 
-  (use-package lsp-ivy)
+  (use-package lsp-ivy
+    :after lsp)
 
 #+end_src
 
@@ -1181,20 +1248,29 @@ We also use [[https://github.com/sebastiencs/company-box][company-box]] to furth
 #+begin_src emacs-lisp
 
   (use-package company
-    :custom
-    (company-minimum-prefix-length 1)
-    (company-idle-delay 0.0)
+    :after lsp-mode
+    :hook
+    (lsp-mode . company-mode)
     :bind
     (:map company-active-map
           ("<tab>" . company-complete-selection))
     (:map lsp-mode-map
           ("<tab>" . company-indent-or-complete-common))
-    :hook
-    (lsp-mode . company-mode))
+    :custom
+    (company-minimum-prefix-length 1)
+    (company-idle-delay 0.0))
 
   (use-package company-box
     :hook
     (company-mode . company-box-mode))
+
+#+end_src
+
+*** Company-c-headers
+
+This library enables the completion of C/C++ header file names using Company mode for Emacs.
+
+#+begin_src emacs-lisp
 
   (defun efs/company-c-headers-config ()
     (add-to-list 'company-c-headers-path-system (car (get_directories_using_regex "gcc"))))
@@ -1245,7 +1321,7 @@ Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs, intende
   (defun init-dap-json (app)
     (interactive "sApplication name: ")
     (with-temp-file "launch.json"
-        (insert (format "{
+      (insert (format "{
       \"version\": \"0.2.0\",
       \"configurations\": [
           {
@@ -1265,8 +1341,9 @@ Flycheck is a modern on-the-fly syntax checking extension for GNU Emacs, intende
   }" app app "lldb" (find_debugger_path))))) ;; Special case - %S MIDebuggerPath keep "\\"
 
   (use-package dap-mode
+    :commands dap-debug
     :hook
-    (lsp-deferred . dap-mode)
+    (lsp-mode . dap-mode)
     (dap-mode . efs/dap-cpptools)
     (dap-mode . efs/dap-mode-configs)
     :config
@@ -1280,7 +1357,8 @@ Provides syntax highlighting and indentation for CMakeLists.txt and *.cmake sour
 
 #+begin_src emacs-lisp
 
-  (use-package cmake-mode)
+  (use-package cmake-mode
+    :after lsp)
 
 #+end_src
 
@@ -1328,4 +1406,27 @@ https://clangd.llvm.org/config.html https://clangd.llvm.org/design/indexing
 
 #+end_src
 
+** Doxygen
 
+Doxygen is a documentation generator and static analysis tool for software source trees. When used as a documentation generator, Doxygen extracts information from specially-formatted comments within the code. When used for analysis, Doxygen uses its parse tree to generate diagrams and charts of the code structure.
+
+#+begin_src emacs-lisp
+
+  ;; (use-package highlight-doxygen
+  ;;   :hook
+  ;;   (lsp-mode . highlight-doxygen-mode)
+  ;;   (c++-mode . highlight-doxygen-global-mode)
+  ;;   (c-mode . highlight-doxygen-global-mode))
+
+#+end_src
+
+* Runtime Performance
+
+Dial the GC threshold back down so that garbage collection happens more frequently but in less time.
+
+#+begin_src emacs-lisp
+
+  ;; Make gc pauses faster by decreasing the threshold.
+  (setq gc-cons-threshold (* 2 1000 1000))
+
+#+end_src
