@@ -569,6 +569,34 @@ A master command to easilly initialize your project with the correct startup fil
 
 #+end_src
 
+* External Ide
+
+Other Ide services used for running c++ projects or cmake-based projects.
+
+** Rider
+
+Tips: Usefull when doing game development like Unreal Engine. Doesn't support cmake-based projects and require a project solution.
+
+#+begin_src emacs-lisp
+
+  (defun install-rider()
+    (interactive)
+    (shell-command "choco install jetbrains-rider -y"))
+
+#+end_src
+
+** CLion
+
+Tips: Usefull when running cmake-based projects.
+
+#+begin_src emacs-lisp
+
+  (defun install-clion()
+    (interactive)
+    (shell-command "choco install clion-ide -y")) 
+
+#+end_src
+
 * Package System Setup
 
 Emacs has a built in package manager but it doesn't make it easy to automatically install packages on a new system the first time you pull down your configuration.  [[https://github.com/jwiegley/use-package][use-package]] is a really helpful package used in this configuration to make it a lot easier to automate the installation and configuration of everything else we use.
